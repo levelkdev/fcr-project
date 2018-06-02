@@ -1,9 +1,11 @@
 import _ from 'lodash'
 import moment from 'moment'
-import web3 from './web3'
+import web3 from './socketWeb3'
 import React, { Component } from 'react'
-import Registry from './web3Contracts/Registry'
+import registry from './web3Contracts/registry'
 import ipfsAPI from 'ipfs-api'
+
+const Registry = registry(web3, '0x403cc7802725928652a3d116bb1781005e2e76d3')
 
 const ipfs = ipfsAPI('ipfs.infura.io', '5001', {protocol: 'https'})
 
@@ -18,27 +20,48 @@ class Home extends Component {
   }
 
   componentWillMount() {
-    const whiteCardTokenUnits = 10 ** 12 * 10 ** 18
-    const defaultTokenBuyAmount = 0.001 * 10 ** 18
+    this.fetchApplicationEvents()
+  }
 
+  fetchApplicationEvents () {
     Registry.getPastEvents('_Application', {
       fromBlock: 0,
       toBlock: 'latest'
     }, async (err, events) => {
-      let applications = []
-      for(var i = 0; i < events.length; i++) {
-        const event = events[i]
-        const vals = event.returnValues
-        const application = {
-          appEndDate: vals.appEndDate,
-          applicant: vals.applicant,
-          deposit: vals.deposit,
-          listingHash: web3.utils.toAscii(vals.listingHash)
-        }
-        applications.push(application)
+      if (err) {
+        console.error(err)
+      } else {
+        // TODO: calling getPastEvents() before watching for events makes
+        //       the `.on('data',...)` handler fire for all past events.
+        //       should figure out why, and see if there's a cleaner way to
+        //       get these.
+        this.watchApplicationEvents()
       }
-      this.setState({ applications: applications })
     })
+  }
+
+  watchApplicationEvents () {
+    Registry.events._Application({
+      fromBlock: 0,
+      toBlock: 'latest'
+    })
+    .on('data', (event) => {
+      this.setApplicationEventToState(event)
+    })
+    .on('error', console.error)
+  }
+
+  setApplicationEventToState (event) {
+    const vals = event.returnValues
+    const application = {
+      appEndDate: vals.appEndDate,
+      applicant: vals.applicant,
+      deposit: vals.deposit,
+      listingHash: web3.utils.toAscii(vals.listingHash)
+    }
+    let applications = this.state.applications
+    applications.unshift(application)
+    this.setState({ applications })
   }
 
   render() {

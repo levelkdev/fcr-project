@@ -1,7 +1,3 @@
-import web3 from '../web3';
-
-const address = '0x403cc7802725928652a3d116bb1781005e2e76d3'
-
 const abi = [
   {
     "constant": true,
@@ -565,4 +561,6 @@ const abi = [
   }
 ]
 
-export default new web3.eth.Contract(abi, address);
+export default (web3, address) => {
+  return new web3.eth.Contract(abi, address)
+}
