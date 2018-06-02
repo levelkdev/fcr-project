@@ -26,31 +26,9 @@ class Home extends Component {
   }
 
   fetchApplicationEvents () {
-    fcr.registry.contract.getPastEvents('_Application', {
-      fromBlock: 0,
-      toBlock: 'latest'
-    }, async (err, events) => {
-      if (err) {
-        console.error(err)
-      } else {
-        // TODO: calling getPastEvents() before watching for events makes
-        //       the `.on('data',...)` handler fire for all past events.
-        //       should figure out why, and see if there's a cleaner way to
-        //       get these.
-        this.watchApplicationEvents()
-      }
-    })
-  }
-
-  watchApplicationEvents () {
-    fcr.registry.contract.events._Application({
-      fromBlock: 0,
-      toBlock: 'latest'
-    })
-    .on('data', (event) => {
+    fcr.registry.watchApplicationEvents((event) => {
       this.setApplicationEventToState(event)
-    })
-    .on('error', console.error)
+    }, (err) => console.error)
   }
 
   setApplicationEventToState (event) {

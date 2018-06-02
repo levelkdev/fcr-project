@@ -6,6 +6,28 @@ module.exports = (web3, address, defaultOptions) => {
 
   const contract = new web3.eth.Contract(registryABI, address)
 
+  const watchApplicationEvents = (callback, errCallback) => {
+    // TODO: get the `fromBlock` value from fcr-config
+    const eventFilterConfig = {
+      fromBlock: 0,
+      toBlock: 'latest'
+    }
+
+    contract.getPastEvents('_Application', eventFilterConfig, async (err, events) => {
+      if (err) {
+        errCallback(err)
+      } else {
+        // TODO: calling getPastEvents() before watching for events makes
+        //       the `.on('data',...)` handler fire for all past events.
+        //       should figure out why, and see if there's a cleaner way to
+        //       get these.
+        contract.events._Application(eventFilterConfig)
+          .on('data', callback)
+          .on('error', errCallback)
+      }
+    })
+  }
+
   const apply = async (applicant, listingHash, amount, data) => {
     const existingListing = await getListing(listingHash)
     if (existingListing.applicationExpiry !== '0') {
@@ -32,6 +54,7 @@ module.exports = (web3, address, defaultOptions) => {
   }
 
   return {
+    watchApplicationEvents,
     apply,
     getListing,
     name,
