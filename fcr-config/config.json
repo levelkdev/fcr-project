@@ -1,0 +1,9 @@
+{
+  "local": {
+    "tokenAddress": "0x85a84691547b7ccf19d7c31977a7f8c0af1fb25a",
+    "registryAddress": "0x403cc7802725928652a3d116bb1781005e2e76d3",
+    "defaultOptions": {
+      "gas": 6721975
+    }
+  }
+}

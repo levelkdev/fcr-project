@@ -1,0 +1,9 @@
+{
+  "name": "fcr-js",
+  "version": "0.1.0",
+  "private": false,
+  "main": "scr/index.js",
+  "dependencies": {
+    "lodash": "^4.17.10"
+  }
+}
