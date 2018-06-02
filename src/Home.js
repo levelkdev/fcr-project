@@ -12,7 +12,9 @@ class Home extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      applications: []
+    };
   }
 
   componentWillMount() {
@@ -23,16 +25,39 @@ class Home extends Component {
       fromBlock: 0,
       toBlock: 'latest'
     }, async (err, events) => {
+      let applications = []
       for(var i = 0; i < events.length; i++) {
-        let event = events[i]
-        console.log('EVENT: ', event)
+        const event = events[i]
+        const vals = event.returnValues
+        const application = {
+          appEndDate: vals.appEndDate,
+          applicant: vals.applicant,
+          deposit: vals.deposit,
+          listingHash: web3.utils.toAscii(vals.listingHash)
+        }
+        applications.push(application)
       }
+      this.setState({ applications: applications })
     })
   }
 
   render() {
+    const applicationElems = this.state.applications.map((application) => {
+      return (
+        <div key={`listing_${application.listingHash}`}>
+          <div>listingHash: {application.listingHash}</div>
+          <div>appEndDate: {application.appEndDate}</div>
+          <div>applicant: {application.applicant}</div>
+          <div>deposit: {application.deposit}</div>
+          <br /><br />
+        </div>
+      )
+    })
     return (
-      <div>HELLO FCR</div>
+      <div>
+        <h1>Applications</h1>
+        {applicationElems}
+      </div>
     )
   }
 }
