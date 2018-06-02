@@ -2,10 +2,12 @@ import _ from 'lodash'
 import moment from 'moment'
 import web3 from './socketWeb3'
 import React, { Component } from 'react'
-import registry from './web3Contracts/registry'
 import ipfsAPI from 'ipfs-api'
+import config from 'fcr-config'
+import fcrjs from 'fcr-js/src'
 
-const Registry = registry(web3, '0x403cc7802725928652a3d116bb1781005e2e76d3')
+// TODO add config to the CLI to switch envs (local, ropsten, etc)
+const fcr = fcrjs(web3, config.local)
 
 const ipfs = ipfsAPI('ipfs.infura.io', '5001', {protocol: 'https'})
 
@@ -24,7 +26,7 @@ class Home extends Component {
   }
 
   fetchApplicationEvents () {
-    Registry.getPastEvents('_Application', {
+    fcr.registry.contract.getPastEvents('_Application', {
       fromBlock: 0,
       toBlock: 'latest'
     }, async (err, events) => {
@@ -41,7 +43,7 @@ class Home extends Component {
   }
 
   watchApplicationEvents () {
-    Registry.events._Application({
+    fcr.registry.contract.events._Application({
       fromBlock: 0,
       toBlock: 'latest'
     })

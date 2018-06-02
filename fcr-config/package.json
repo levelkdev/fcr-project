@@ -1,0 +1,6 @@
+{
+  "name": "fcr-config",
+  "version": "0.1.0",
+  "private": false,
+  "main": "config.json"
+}

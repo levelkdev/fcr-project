@@ -14,7 +14,9 @@
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.4",
     "sha256": "^0.2.0",
-    "web3": "^1.0.0-beta.26"
+    "web3": "^1.0.0-beta.26",
+    "fcr-config": "file:../fcr-config",
+    "fcr-js": "file:../fcr-js"
   },
   "scripts": {
     "start": "react-scripts start",
