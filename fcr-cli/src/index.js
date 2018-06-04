@@ -43,6 +43,37 @@ yargs
     }
   )
 
+  .command(
+    'createChallenge <listingHash> [data]',
+    'create a challenge for a listing',
+    {
+      listingHash: {
+        require: true
+      },
+      data: {
+        default: ''
+      },
+      from: {
+        default: '0',
+        number: true
+      }
+    },
+    async (argv) => {
+      const challenger = await getFromAddress(argv.from)
+
+      console.log('')
+      console.log(`sending 'createChallenge' transaction:`)
+      console.log(`  listingHash: ${argv.listingHash}`)
+      console.log(`  data: ${argv.data}`)
+      console.log(`  challenger (sender): ${challenger}`)
+      console.log('')
+
+      const tx = await fcr.registry.createChallenge(challenger, argv.listingHash, argv.data)
+      console.log(tx)
+      console.log('')
+    }
+  )
+
   .command({
     command: 'registryName',
     desc: 'get the name of the registry',
