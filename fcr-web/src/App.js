@@ -8,6 +8,7 @@ import {
   HashRouter
 } from "react-router-dom"
 import Home from "./Home"
+import Listing from "./Listing"
 
 class App extends Component {
 
@@ -26,13 +27,13 @@ class App extends Component {
 
             <div className="nav-right">
               <NavLink to="/home">Home</NavLink>
-              <NavLink to="/rules">Two</NavLink>
             </div>
           </div>
 
           <div className="content">
             <Route exact path="/" component={Home}/>
             <Route exact path="/home" component={Home}/>
+            <Route exact path="/listings/:listingHash" component={Listing}/>
           </div>
 
         </div>

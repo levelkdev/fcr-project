@@ -7,11 +7,14 @@ module.exports = (web3, address, defaultOptions) => {
 
   const contract = new web3.eth.Contract(registryABI, address)
 
-  const watchEvent = (eventName, callback, errCallback) => {
+  const watchEvent = (eventName, filter, callback, errCallback) => {
     // TODO: get the `fromBlock` value from fcr-config
-    const eventFilterConfig = {
+    let eventFilterConfig = {
       fromBlock: 0,
       toBlock: 'latest'
+    }
+    if (filter) {
+      eventFilterConfig.filter = filter
     }
 
     contract.getPastEvents(eventName, eventFilterConfig, async (err, events) => {

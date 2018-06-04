@@ -15,3 +15,17 @@ body {
     display: table;
     clear: both;
 }
+
+table {
+    border-collapse: collapse;
+}
+table td.title-cell {
+    text-align: center;
+}
+table td.shady {
+    background: #eee
+}
+table td {
+    padding: 5px 10px;
+    border: 1px solid black;
+}
