@@ -44,39 +44,8 @@ yargs
   )
 
   .command(
-    'createChallenge <listingHash> [data]',
+    'challenge <listingHash> <lowerBound> <upperBound> [data]',
     'create a challenge for a listing',
-    {
-      listingHash: {
-        require: true
-      },
-      data: {
-        default: ''
-      },
-      from: {
-        default: '0',
-        number: true
-      }
-    },
-    async (argv) => {
-      const challenger = await getFromAddress(argv.from)
-
-      console.log('')
-      console.log(`sending 'createChallenge' transaction:`)
-      console.log(`  listingHash: ${argv.listingHash}`)
-      console.log(`  data: ${argv.data}`)
-      console.log(`  challenger (sender): ${challenger}`)
-      console.log('')
-
-      const tx = await fcr.registry.createChallenge(challenger, argv.listingHash, argv.data)
-      console.log(tx)
-      console.log('')
-    }
-  )
-
-  .command(
-    'startChallenge <listingHash> <lowerBound> <upperBound>',
-    'starts a challenge for a listing',
     {
       listingHash: {
         require: true
@@ -89,6 +58,9 @@ yargs
         require: true,
         number: true
       },
+      data: {
+        default: ''
+      },
       from: {
         default: '0',
         number: true
@@ -97,21 +69,50 @@ yargs
     async (argv) => {
       const challenger = await getFromAddress(argv.from)
 
-      console.log('')
-      console.log(`Starting challenge for listing '${argv.listingHash}'`)
+      console.log(`Creating challenge for ${argv.listingHash}:`)
       console.log(`  challenger (sender): ${challenger}`)
+
+      console.log('')
+      console.log(`registry.createChallenge({`)
+      console.log(`  listingHash: ${argv.listingHash},`)
+      console.log(`  data: ${argv.data},`)
+      console.log('})')
+      console.log('')
+
+      const createChallengeTxReceipt = await fcr.registry.createChallenge(
+        challenger,
+        argv.listingHash,
+        argv.data
+      )
+      console.log(createChallengeTxReceipt)
       console.log('')
 
       const listing = await fcr.registry.getListing(argv.listingHash)
-      if (parseInt(listing.challengeID) == 0) {
-        console.log(`No challenge for listing '${argv.listingHash}'`)
-        return
-      }
-
       const challenge = await fcr.registry.getChallenge(listing.challengeID)
-      const res = await challenge.start(challenger, argv.lowerBound, argv.upperBound)
-      console.log(res)
+      console.log(`Challenge created: ChallengeID=${listing.challengeID}`)
+      console.log('')
+  
+      console.log(`challenge.start({`)
+      console.log(`  lowerBound: ${argv.lowerBound},`)
+      console.log(`  upperBound: ${argv.upperBound}`)
+      console.log('})')
+      const startTxReceipt = await challenge.start(
+        challenger,
+        argv.lowerBound,
+        argv.upperBound
+      )
+      console.log(startTxReceipt)
+      console.log('')
+      console.log('Challenge started')
+      console.log('')
 
+      console.log('challenge.fund()')
+      console.log('')
+  
+      const fundTxReceipt = await challenge.fund(challenger)
+      console.log(fundTxReceipt)
+      console.log('')
+      console.log('Challenge funded')
       console.log('')
     }
   )

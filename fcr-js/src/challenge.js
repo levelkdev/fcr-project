@@ -37,34 +37,58 @@ module.exports = (token, web3, address, defaultOptions) => {
     return started
   }
 
+  const funded = async () => {
+    const funded = await contract.methods.isFunded().call()
+    return funded
+  }
+
   const start = async (challenger, lowerBound, upperBound) => {
     const isStarted = await contract.methods.isStarted().call()
-    console.log('isStarted: ', isStarted)
     if (isStarted) {
       throw new Error('challenge is already started')
     }
 
-    const stakeAmount = await contract.methods.stakeAmount().call()
-    let approvalRes, startRes
+    let startTxReceipt
     try {
-      approvalRes = await token.approve(challenger, address, stakeAmount)
-    } catch (err) {
-      throw new Error(`token.approval tx failed: ${err}`)
-    }
-
-    try {
-      startRes = await contract.methods.start(lowerBound, upperBound)
+      startTxReceipt = await contract.methods.start(lowerBound, upperBound)
         .send(_.extend({ from: challenger }, defaultOptions))
     } catch (err) {
       throw new Error(`challenge.start tx failed: ${err}`)
     }
 
-    return [ approvalRes, startRes ]
+    return startTxReceipt
+  }
+
+  const fund = async (challenger) => {
+    const isFunded = await contract.methods.isFunded().call()
+    if (isFunded) {
+      throw new Error('challenge is already funded')
+    }
+
+    const stakeAmount = await contract.methods.stakeAmount().call()
+    let approveTxReceipt
+    try {
+      approveTxReceipt = await token.approve(challenger, address, stakeAmount)
+    } catch (err) {
+      throw new Error(`token.approval tx failed: ${err}`)
+    }
+
+    let fundTxReceipt
+    try {
+      fundTxReceipt = await contract.methods.fund()
+        .send(_.extend({ from: challenger }, defaultOptions))
+    } catch (err) {
+      throw new Error(`challenge.fund tx failed: ${err}`)
+    }
+
+    return [ approveTxReceipt, fundTxReceipt ]
   }
 
   return {
     start,
     started,
+    fund,
+    funded,
     watchEvent,
     address,
     contract

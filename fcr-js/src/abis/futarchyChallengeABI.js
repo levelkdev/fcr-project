@@ -112,6 +112,20 @@ module.exports = [
     "type": "function"
   },
   {
+    "constant": true,
+    "inputs": [],
+    "name": "isFunded",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": false,
     "inputs": [
       {
@@ -141,6 +155,15 @@ module.exports = [
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "fund",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -279,61 +302,21 @@ module.exports = [
     "inputs": [
       {
         "indexed": false,
-        "name": "futarchyOracleFactory",
+        "name": "challenger",
         "type": "address"
       },
       {
         "indexed": false,
-        "name": "collateralToken",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "name": "oracle",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "name": "outcomeCount",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "name": "lowerBound",
-        "type": "int256"
-      },
-      {
-        "indexed": false,
-        "name": "upperBound",
-        "type": "int256"
-      },
-      {
-        "indexed": false,
-        "name": "marketMaker",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "name": "fee",
-        "type": "uint24"
-      },
-      {
-        "indexed": false,
-        "name": "tradingPeriod",
+        "name": "stakeAmount",
         "type": "uint256"
       },
       {
         "indexed": false,
-        "name": "startDate",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "name": "now",
-        "type": "uint256"
+        "name": "futarchyOracleAddress",
+        "type": "address"
       }
     ],
-    "name": "_DebugStart",
+    "name": "_Funded",
     "type": "event"
   }
 ]

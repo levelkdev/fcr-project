@@ -18,6 +18,8 @@ class Listing extends Component {
     this.state = {
       listingHash,
       listingName,
+      listingLoaded: false,
+      challengeLoaded: false,
       challenge: {}
     }
     
@@ -39,13 +41,10 @@ class Listing extends Component {
     this.fetchChallenge(event.returnValues.challengeID)
   }
 
-  handleStartedEvent (event) {
-    this.setChallengeToState()
-  }
-
   async fetchListing () {
     const listing = await fcr.registry.getListing(this.state.listingName)
     this.setState({
+      listingLoaded: true,
       deposit: parseInt(listing.deposit),
       owner: listing.owner,
       applicationExpiry: parseInt(listing.applicationExpiry),
@@ -60,31 +59,57 @@ class Listing extends Component {
       this.challenge.watchEvent(
         '_Started',
         {},
-        (event) => { this.handleStartedEvent(event) },
+        () => { this.setChallengeToState() },
+        console.error
+      )
+
+      this.challenge.watchEvent(
+        '_Funded',
+        {},
+        () => { this.setChallengeToState() },
         console.error
       )
     }
 
     this.setState({ challengeID })
-
     this.setChallengeToState()
   }
 
   async setChallengeToState () {
     const challengeStarted = await this.challenge.started()
+    const challengeFunded = await this.challenge.funded()
     this.setState({
+      challengeLoaded: true,
       challenge: {
-        started: challengeStarted
+        started: challengeStarted,
+        funded: challengeFunded
       }
     })
   }
 
   renderChallenge () {
+    if (!this.state.challengeLoaded) {
+      return <div>Loading..</div>
+    }
     if(this.state.challengeID > 0) {
       return (
         <div>
-          CHALLENGE ID: {this.state.challengeID}
-          <div>Started: {formatBool(this.state.challenge.started)}</div>
+          <table>
+            <tbody>
+              <tr>
+                <td className={'shady'}>ChallengeID</td>
+                <td>{this.state.challengeID}</td>
+              </tr>
+              <tr>
+                <td className={'shady'}>Started</td>
+                <td>{formatBool(this.state.challenge.started)}</td>
+              </tr>
+              <tr>
+                <td className={'shady'}>Funded</td>
+                <td>{formatBool(this.state.challenge.funded)}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       )
     } else {
@@ -94,26 +119,35 @@ class Listing extends Component {
     }
   }
 
+  renderListing () {
+    if (!this.state.listingLoaded) {
+      return <div>Loading...</div>
+    }
+    return (
+      <table>
+        <tbody>
+          <tr>
+            <td className={'shady'}>Owner</td>
+            <td>{this.state.owner}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>Deposit</td>
+            <td>{this.state.deposit}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>Expires</td>
+            <td>{getFormattedDate(this.state.applicationExpiry)}</td>
+          </tr>
+        </tbody>
+      </table>
+    )
+  }
+
   render () {
     return (
       <div>
         <h1>{this.state.listingName}</h1>
-        <table>
-          <tbody>
-            <tr>
-              <td className={'shady'}>Owner</td>
-              <td>{this.state.owner}</td>
-            </tr>
-            <tr>
-              <td className={'shady'}>Deposit</td>
-              <td>{this.state.deposit}</td>
-            </tr>
-            <tr>
-              <td className={'shady'}>Expires</td>
-              <td>{getFormattedDate(this.state.applicationExpiry)}</td>
-            </tr>
-          </tbody>
-        </table>
+        {this.renderListing()}
         <br /><br />
 
         <h2>Challenge Status</h2>
