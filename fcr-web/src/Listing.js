@@ -20,6 +20,8 @@ class Listing extends Component {
       listingName,
       challenge: {}
     }
+    
+    this.challenge = null
   }
 
   componentWillMount () {
@@ -37,6 +39,10 @@ class Listing extends Component {
     this.fetchChallenge(event.returnValues.challengeID)
   }
 
+  handleStartedEvent (event) {
+    this.setChallengeToState()
+  }
+
   async fetchListing () {
     const listing = await fcr.registry.getListing(this.state.listingName)
     this.setState({
@@ -48,10 +54,25 @@ class Listing extends Component {
   }
 
   async fetchChallenge (challengeID) {
-    const challenge = await fcr.registry.getChallenge(challengeID)
-    const challengeStarted = await challenge.started()
+    if (!this.challenge) {
+      this.challenge = await fcr.registry.getChallenge(challengeID)
+
+      this.challenge.watchEvent(
+        '_Started',
+        {},
+        (event) => { this.handleStartedEvent(event) },
+        console.error
+      )
+    }
+
+    this.setState({ challengeID })
+
+    this.setChallengeToState()
+  }
+
+  async setChallengeToState () {
+    const challengeStarted = await this.challenge.started()
     this.setState({
-      challengeID,
       challenge: {
         started: challengeStarted
       }

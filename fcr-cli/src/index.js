@@ -74,6 +74,48 @@ yargs
     }
   )
 
+  .command(
+    'startChallenge <listingHash> <lowerBound> <upperBound>',
+    'starts a challenge for a listing',
+    {
+      listingHash: {
+        require: true
+      },
+      lowerBound: {
+        require: true,
+        number: true
+      },
+      upperBound: {
+        require: true,
+        number: true
+      },
+      from: {
+        default: '0',
+        number: true
+      }
+    },
+    async (argv) => {
+      const challenger = await getFromAddress(argv.from)
+
+      console.log('')
+      console.log(`Starting challenge for listing '${argv.listingHash}'`)
+      console.log(`  challenger (sender): ${challenger}`)
+      console.log('')
+
+      const listing = await fcr.registry.getListing(argv.listingHash)
+      if (parseInt(listing.challengeID) == 0) {
+        console.log(`No challenge for listing '${argv.listingHash}'`)
+        return
+      }
+
+      const challenge = await fcr.registry.getChallenge(listing.challengeID)
+      const res = await challenge.start(challenger, argv.lowerBound, argv.upperBound)
+      console.log(res)
+
+      console.log('')
+    }
+  )
+
   .command({
     command: 'registryName',
     desc: 'get the name of the registry',

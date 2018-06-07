@@ -16,6 +16,20 @@ module.exports = [
   {
     "constant": true,
     "inputs": [],
+    "name": "ended",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
     "name": "futarchyOracle",
     "outputs": [
       {
@@ -98,6 +112,38 @@ module.exports = [
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_lowerBound",
+        "type": "int256"
+      },
+      {
+        "name": "_upperBound",
+        "type": "int256"
+      }
+    ],
+    "name": "start",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "passed",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [],
     "name": "lmsrMarketMaker",
@@ -105,6 +151,20 @@ module.exports = [
       {
         "name": "",
         "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "tokenLockAmount",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
       }
     ],
     "payable": false,
@@ -193,63 +253,87 @@ module.exports = [
     "type": "constructor"
   },
   {
-    "constant": false,
+    "anonymous": false,
     "inputs": [
       {
-        "name": "_lowerBound",
+        "indexed": false,
+        "name": "challenger",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "stakeAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "futarchyOracleAddress",
+        "type": "address"
+      }
+    ],
+    "name": "_Started",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "name": "futarchyOracleFactory",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "collateralToken",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "oracle",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "name": "outcomeCount",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "name": "lowerBound",
         "type": "int256"
       },
       {
-        "name": "_upperBound",
+        "indexed": false,
+        "name": "upperBound",
         "type": "int256"
-      }
-    ],
-    "name": "start",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "ended",
-    "outputs": [
+      },
       {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "passed",
-    "outputs": [
+        "indexed": false,
+        "name": "marketMaker",
+        "type": "address"
+      },
       {
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "tokenLockAmount",
-    "outputs": [
+        "indexed": false,
+        "name": "fee",
+        "type": "uint24"
+      },
       {
-        "name": "",
+        "indexed": false,
+        "name": "tradingPeriod",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "startDate",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "name": "now",
         "type": "uint256"
       }
     ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
+    "name": "_DebugStart",
+    "type": "event"
   }
 ]
