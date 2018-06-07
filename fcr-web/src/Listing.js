@@ -19,7 +19,6 @@ class Listing extends Component {
       listingHash,
       listingName,
       listingLoaded: false,
-      challengeLoaded: false,
       challenge: {}
     }
     
@@ -79,7 +78,6 @@ class Listing extends Component {
     const challengeStarted = await this.challenge.started()
     const challengeFunded = await this.challenge.funded()
     this.setState({
-      challengeLoaded: true,
       challenge: {
         started: challengeStarted,
         funded: challengeFunded
@@ -88,33 +86,31 @@ class Listing extends Component {
   }
 
   renderChallenge () {
-    if (!this.state.challengeLoaded) {
-      return <div>Loading..</div>
-    }
-    if(this.state.challengeID > 0) {
+    if (this.state.listingLoaded) {
+      let challengeStatusElem = this.state.challengeID > 0 ? (
+        <table>
+          <tbody>
+            <tr>
+              <td className={'shady'}>ChallengeID</td>
+              <td>{this.state.challengeID}</td>
+            </tr>
+            <tr>
+              <td className={'shady'}>Started</td>
+              <td>{formatBool(this.state.challenge.started)}</td>
+            </tr>
+            <tr>
+              <td className={'shady'}>Funded</td>
+              <td>{formatBool(this.state.challenge.funded)}</td>
+            </tr>
+          </tbody>
+        </table>
+      ) : <div>No challenge</div>
+  
       return (
         <div>
-          <table>
-            <tbody>
-              <tr>
-                <td className={'shady'}>ChallengeID</td>
-                <td>{this.state.challengeID}</td>
-              </tr>
-              <tr>
-                <td className={'shady'}>Started</td>
-                <td>{formatBool(this.state.challenge.started)}</td>
-              </tr>
-              <tr>
-                <td className={'shady'}>Funded</td>
-                <td>{formatBool(this.state.challenge.funded)}</td>
-              </tr>
-            </tbody>
-          </table>
+          <h2>Challenge Status</h2>
+          {challengeStatusElem}
         </div>
-      )
-    } else {
-      return (
-        <div>No challenge</div>
       )
     }
   }
@@ -150,7 +146,6 @@ class Listing extends Component {
         {this.renderListing()}
         <br /><br />
 
-        <h2>Challenge Status</h2>
         {this.renderChallenge()}
       </div>
     )
