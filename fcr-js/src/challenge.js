@@ -252,6 +252,13 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     return fee
   }
 
+  const getAverageOutcomePrice = async (outcome) => {
+    const decision = decisionForOutcome(outcome)
+    const decisionMarket = await getDecisionMarket(decision)
+    const averageLongPrice = await decisionMarket.methods.getAvgPrice().call()
+    return indexForOutcome(outcome) == 1 ? averageLongPrice : (10 ** 20) - averageLongPrice
+  }
+
   const watchOutcomeTokenPurchases = async (filter, callback, errCallback) => {
     const acceptedDecisionMarket = await getDecisionMarket('ACCEPTED')
     const deniedDecisionMarket = await getDecisionMarket('DENIED')
@@ -280,6 +287,7 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     getDecisionToken,
     calculateOutcomeCost,
     calculateOutcomeFee,
+    getAverageOutcomePrice,
     watchStarted: watchEventFn(contract, '_Started'),
     watchFunded: watchEventFn(contract, '_Funded'),
     watchOutcomeTokenPurchases,

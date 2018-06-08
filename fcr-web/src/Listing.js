@@ -20,7 +20,7 @@ class Listing extends Component {
       listingName,
       listingLoaded: false,
       challenge: {
-        outcomeCosts: {}
+        outcomeAveragePrices: {}
       }
     }
     
@@ -82,28 +82,29 @@ class Listing extends Component {
     this.setChallengeToState()
   }
 
-  async getOutcomeCost (outcome) {
-    const cost = await this.challenge.calculateOutcomeCost(outcome, 10 ** 18)
-    return Math.round(cost / 10 ** 14) / 10 ** 4
+  async getAverageOutcomePrice (outcome) {
+    const avgPrice = await this.challenge.getAverageOutcomePrice(outcome)
+    return Math.round(avgPrice / 10 ** 14) / 10 ** 6
   }
 
   async setChallengeToState () {
     const challengeStarted = await this.challenge.started()
     const challengeFunded = await this.challenge.funded()
-    const longAcceptedCost = await this.getOutcomeCost(fcr.outcomes.LONG_ACCEPTED)
-    const shortAcceptedCost = await this.getOutcomeCost(fcr.outcomes.SHORT_ACCEPTED)
-    const longDeniedCost = await this.getOutcomeCost(fcr.outcomes.LONG_DENIED)
-    const shortDeniedCost = await this.getOutcomeCost(fcr.outcomes.SHORT_DENIED)
+
+    const longAcceptedPrice = await this.getAverageOutcomePrice(fcr.outcomes.LONG_ACCEPTED)
+    const shortAcceptedPrice = await this.getAverageOutcomePrice(fcr.outcomes.SHORT_ACCEPTED)
+    const longDeniedPrice = await this.getAverageOutcomePrice(fcr.outcomes.LONG_DENIED)
+    const shortDeniedPrice = await this.getAverageOutcomePrice(fcr.outcomes.SHORT_DENIED)
 
     this.setState({
       challenge: {
         started: challengeStarted,
         funded: challengeFunded,
-        outcomeCosts: {
-          LONG_ACCEPTED: longAcceptedCost,
-          SHORT_ACCEPTED: shortAcceptedCost,
-          LONG_DENIED: longDeniedCost,
-          SHORT_DENIED: shortDeniedCost,
+        outcomeAveragePrices: {
+          LONG_ACCEPTED: longAcceptedPrice,
+          SHORT_ACCEPTED: shortAcceptedPrice,
+          LONG_DENIED: longDeniedPrice,
+          SHORT_DENIED: shortDeniedPrice,
         }
       }
     })
@@ -120,11 +121,11 @@ class Listing extends Component {
             </tr>
             <tr>
               <td className={'shady'}>LONG_ACCEPTED</td>
-              <td>{this.state.challenge.outcomeCosts.LONG_ACCEPTED}</td>
+              <td>{this.state.challenge.outcomeAveragePrices.LONG_ACCEPTED}</td>
             </tr>
             <tr>
               <td className={'shady'}>SHORT_ACCEPTED</td>
-              <td>{this.state.challenge.outcomeCosts.SHORT_ACCEPTED}</td>
+              <td>{this.state.challenge.outcomeAveragePrices.SHORT_ACCEPTED}</td>
             </tr>
           </tbody>
         </table>
@@ -138,11 +139,11 @@ class Listing extends Component {
             </tr>
             <tr>
               <td className={'shady'}>LONG_DENIED</td>
-              <td>{this.state.challenge.outcomeCosts.LONG_DENIED}</td>
+              <td>{this.state.challenge.outcomeAveragePrices.LONG_DENIED}</td>
             </tr>
             <tr>
               <td className={'shady'}>SHORT_DENIED</td>
-              <td>{this.state.challenge.outcomeCosts.SHORT_DENIED}</td>
+              <td>{this.state.challenge.outcomeAveragePrices.SHORT_DENIED}</td>
             </tr>
           </tbody>
         </table>
