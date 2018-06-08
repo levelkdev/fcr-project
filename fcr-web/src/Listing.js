@@ -57,17 +57,25 @@ class Listing extends Component {
     if (!this.challenge) {
       this.challenge = await fcr.registry.getChallenge(challengeID)
 
-      this.challenge.watchEvent(
-        '_Started',
+      this.challenge.watchStarted(
         {},
         () => { this.setChallengeToState() },
         console.error
       )
 
-      this.challenge.watchEvent(
-        '_Funded',
+      this.challenge.watchFunded(
         {},
         () => { this.setChallengeToState() },
+        console.error
+      )
+
+      this.challenge.watchOutcomeTokenPurchases(
+        {},
+        (event) => {
+          console.log('OUTCOME TOKEN PURCHASE...')
+          console.log(event)
+          this.setChallengeToState()
+        },
         console.error
       )
     }

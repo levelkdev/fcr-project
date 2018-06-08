@@ -30,13 +30,9 @@ function validateOutcome (outcome) {
   }
 }
 
-module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
-  if (!defaultOptions) defaultOptions = {}
-
-  const contract = new web3.eth.Contract(challengeABI, address)
-
-  // TODO: DRY this up
-  const watchEvent = (eventName, filter, callback, errCallback) => {
+// TODO: DRY this up
+function watchEventFn (contract, eventName) {
+  return (filter, callback, errCallback) => {
     // TODO: get the `fromBlock` value from fcr-config
     let eventFilterConfig = {
       fromBlock: 0,
@@ -60,6 +56,12 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
       }
     })
   }
+}
+
+module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
+  if (!defaultOptions) defaultOptions = {}
+
+  const contract = new web3.eth.Contract(challengeABI, address)
 
   const started = async () => {
     const started = await contract.methods.isStarted().call()
@@ -250,6 +252,21 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     return fee
   }
 
+  const watchOutcomeTokenPurchases = async (filter, callback, errCallback) => {
+    const acceptedDecisionMarket = await getDecisionMarket('ACCEPTED')
+    const deniedDecisionMarket = await getDecisionMarket('DENIED')
+    watchEventFn(acceptedDecisionMarket, 'OutcomeTokenPurchase')(
+      filter,
+      callback,
+      errCallback
+    )
+    watchEventFn(deniedDecisionMarket, 'OutcomeTokenPurchase')(
+      filter,
+      callback,
+      errCallback
+    )
+  }
+
   return {
     start,
     started,
@@ -263,7 +280,9 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     getDecisionToken,
     calculateOutcomeCost,
     calculateOutcomeFee,
-    watchEvent,
+    watchStarted: watchEventFn(contract, '_Started'),
+    watchFunded: watchEventFn(contract, '_Funded'),
+    watchOutcomeTokenPurchases,
     address,
     contract
   }
