@@ -19,7 +19,9 @@ class Listing extends Component {
       listingHash,
       listingName,
       listingLoaded: false,
-      challenge: {}
+      challenge: {
+        outcomeCosts: {}
+      }
     }
     
     this.challenge = null
@@ -74,36 +76,103 @@ class Listing extends Component {
     this.setChallengeToState()
   }
 
+  async getOutcomeCost (outcome) {
+    const cost = await this.challenge.calculateOutcomeCost(outcome, 10 ** 18)
+    return Math.round(cost / 10 ** 14) / 10 ** 4
+  }
+
   async setChallengeToState () {
     const challengeStarted = await this.challenge.started()
     const challengeFunded = await this.challenge.funded()
+    const longAcceptedCost = await this.getOutcomeCost(fcr.outcomes.LONG_ACCEPTED)
+    const shortAcceptedCost = await this.getOutcomeCost(fcr.outcomes.SHORT_ACCEPTED)
+    const longDeniedCost = await this.getOutcomeCost(fcr.outcomes.LONG_DENIED)
+    const shortDeniedCost = await this.getOutcomeCost(fcr.outcomes.SHORT_DENIED)
+
     this.setState({
       challenge: {
         started: challengeStarted,
-        funded: challengeFunded
+        funded: challengeFunded,
+        outcomeCosts: {
+          LONG_ACCEPTED: longAcceptedCost,
+          SHORT_ACCEPTED: shortAcceptedCost,
+          LONG_DENIED: longDeniedCost,
+          SHORT_DENIED: shortDeniedCost,
+        }
       }
     })
+  }
+
+  renderDecisionMarketData () {
+    return (
+      <div>
+        <h3>Decision Markets</h3>
+        <table>
+          <tbody>
+            <tr>
+              <td colSpan="2">ACCEPTED</td>
+            </tr>
+            <tr>
+              <td className={'shady'}>LONG_ACCEPTED</td>
+              <td>{this.state.challenge.outcomeCosts.LONG_ACCEPTED}</td>
+            </tr>
+            <tr>
+              <td className={'shady'}>SHORT_ACCEPTED</td>
+              <td>{this.state.challenge.outcomeCosts.SHORT_ACCEPTED}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <br /><br />
+
+        <table>
+          <tbody>
+            <tr>
+              <td colSpan="2">DENIED</td>
+            </tr>
+            <tr>
+              <td className={'shady'}>LONG_DENIED</td>
+              <td>{this.state.challenge.outcomeCosts.LONG_DENIED}</td>
+            </tr>
+            <tr>
+              <td className={'shady'}>SHORT_DENIED</td>
+              <td>{this.state.challenge.outcomeCosts.SHORT_DENIED}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+
+  renderChallengeData () {
+    return (
+      <table>
+        <tbody>
+          <tr>
+            <td className={'shady'}>ChallengeID</td>
+            <td>{this.state.challengeID}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>Started</td>
+            <td>{formatBool(this.state.challenge.started)}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>Funded</td>
+            <td>{formatBool(this.state.challenge.funded)}</td>
+          </tr>
+        </tbody>
+      </table>
+    )
   }
 
   renderChallenge () {
     if (this.state.listingLoaded) {
       let challengeStatusElem = this.state.challengeID > 0 ? (
-        <table>
-          <tbody>
-            <tr>
-              <td className={'shady'}>ChallengeID</td>
-              <td>{this.state.challengeID}</td>
-            </tr>
-            <tr>
-              <td className={'shady'}>Started</td>
-              <td>{formatBool(this.state.challenge.started)}</td>
-            </tr>
-            <tr>
-              <td className={'shady'}>Funded</td>
-              <td>{formatBool(this.state.challenge.funded)}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div>
+          {this.renderChallengeData()}
+          <br /><br />
+          {this.renderDecisionMarketData()}
+        </div>
       ) : <div>No challenge</div>
   
       return (
