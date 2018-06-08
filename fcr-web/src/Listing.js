@@ -72,8 +72,6 @@ class Listing extends Component {
       this.challenge.watchOutcomeTokenPurchases(
         {},
         (event) => {
-          console.log('OUTCOME TOKEN PURCHASE...')
-          console.log(event)
           this.setChallengeToState()
         },
         console.error
