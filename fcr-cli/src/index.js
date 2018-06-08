@@ -117,6 +117,50 @@ yargs
     }
   )
 
+  .command(
+    'buy <listingHash> <outcome> <amount>',
+    `buys outcome token on the given listing's challenge market`,
+    {
+      listingHash: {
+        require: true
+      },
+      outcome: {
+        required: true
+      },
+      amount: {
+        require: true,
+        number: true
+      },
+      from: {
+        default: '0',
+        number: true
+      }
+    },
+    async (argv) => {
+      const buyer = await getFromAddress(argv.from)
+
+      const outcome = fcr.outcomes[argv.outcome]
+      if (!outcome) {
+        throw new Error(`'${argv.outcome}' is not a valid outcome`)
+      }
+
+      const listing = await fcr.registry.getListing(argv.listingHash)
+      if (parseInt(listing.challengeID) == 0) {
+        console.log(`No challenge for listing '${argv.listingHash}'`)
+        return
+      }
+
+      const challenge = await fcr.registry.getChallenge(listing.challengeID)
+
+      const buyOutcomeTxs = await challenge.buyOutcome(
+        buyer,
+        outcome,
+        argv.amount
+      )
+      console.log(buyOutcomeTxs)
+    }
+  )
+
   .command({
     command: 'registryName',
     desc: 'get the name of the registry',

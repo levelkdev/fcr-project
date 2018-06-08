@@ -2,7 +2,7 @@ const _ = require('lodash')
 const registryABI = require('./abis/registryABI')
 const challenge = require('./challenge')
 
-module.exports = (token, web3, address, defaultOptions) => {
+module.exports = (token, LMSR, web3, address, defaultOptions) => {
   if (!defaultOptions) defaultOptions = {}
 
   const contract = new web3.eth.Contract(registryABI, address)
@@ -73,7 +73,7 @@ module.exports = (token, web3, address, defaultOptions) => {
 
   const getChallenge = async (challengeNonce) => {
     const challengeAddress = await contract.methods.challenges(challengeNonce).call()
-    return challenge(token, web3, challengeAddress, defaultOptions)
+    return challenge(token, LMSR, web3, challengeAddress, defaultOptions)
   }
 
   const getAllChallenges = async () => {
