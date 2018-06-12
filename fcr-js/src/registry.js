@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const registryABI = require('./abis/registryABI')
+const TransactionSender = require('./transactionSender')
 const challenge = require('./challenge')
 
 module.exports = (token, LMSR, web3, address, defaultOptions) => {
@@ -38,13 +39,19 @@ module.exports = (token, LMSR, web3, address, defaultOptions) => {
       throw new Error(`listing '${listingHash}' already exists`)
     }
 
-    const res = await contract.methods.apply(
-      web3.utils.fromAscii(listingHash),
-      amount,
-      data
-    ).send(_.extend({ from: applicant }, defaultOptions))
+    const transactionSender = new TransactionSender()
+    await transactionSender.send(
+      contract,
+      'apply',
+      [
+        web3.utils.fromAscii(listingHash),
+        amount,
+        data
+      ],
+      _.extend({ from: applicant }, defaultOptions)
+    )
 
-    return res
+    return transactionSender.response()
   }
 
   const createChallenge = async (challenger, listingHash, data) => {
@@ -57,12 +64,18 @@ module.exports = (token, LMSR, web3, address, defaultOptions) => {
       throw new Error(`listing '${listingHash}' already has an active challenge`)
     }
 
-    const res = await contract.methods.createChallenge(
-      web3.utils.fromAscii(listingHash),
-      data
-    ).send(_.extend({ from: challenger }, defaultOptions))
+    const transactionSender = new TransactionSender()
+    await transactionSender.send(
+      contract,
+      'createChallenge',
+      [
+        web3.utils.fromAscii(listingHash),
+        data
+      ],
+      _.extend({ from: challenger }, defaultOptions)
+    )
 
-    return res
+    return transactionSender.response()
   }
 
   const getListing = async (listingHash) => {

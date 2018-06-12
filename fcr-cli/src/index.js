@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const yargs = require('yargs')
 const web3 = require('./web3')
 const config = require('../../fcr-config/config.json')
@@ -6,6 +7,15 @@ const config = require('../../fcr-config/config.json')
 const fcr = require('../../fcr-js/src')(web3, config.local)
 
 yargs
+  .options({
+    'v': {
+      alias: 'verbose',
+      boolean: true,
+      default: false,
+      describe: 'log verbose output'
+    }
+  })
+
   .command(
     'apply <listingHash> <amount> [data]',
     'submit a listing application to the registry',
@@ -29,17 +39,17 @@ yargs
       const applicant = await getFromAddress(argv.from)
       const amount = tryParseIntParam('amount', argv.amount)
 
-      console.log('')
-      console.log(`sending 'apply' transaction:`)
-      console.log(`  listingHash: ${argv.listingHash}`)
-      console.log(`  amount: ${amount}`)
-      console.log(`  data: ${argv.data}`)
-      console.log(`  applicant (sender): ${applicant}`)
-      console.log('')
-
-      const tx = await fcr.registry.apply(applicant, argv.listingHash, amount, argv.data)
-      console.log(tx)
-      console.log('')
+      await execSenderFunction(
+        argv,
+        'registry.apply',
+        fcr.registry.apply,
+        [
+          ['applicant', applicant],
+          ['listingHash', argv.listingHash],
+          ['amount', amount],
+          ['data', argv.data]
+        ]
+      )
     }
   )
 
@@ -70,49 +80,45 @@ yargs
       const challenger = await getFromAddress(argv.from)
 
       console.log(`Creating challenge for ${argv.listingHash}:`)
-      console.log(`  challenger (sender): ${challenger}`)
-
-      console.log('')
-      console.log(`registry.createChallenge({`)
-      console.log(`  listingHash: ${argv.listingHash},`)
-      console.log(`  data: ${argv.data},`)
-      console.log('})')
-      console.log('')
-
-      const createChallengeTxReceipt = await fcr.registry.createChallenge(
-        challenger,
-        argv.listingHash,
-        argv.data
+      
+      await execSenderFunction(
+        argv,
+        'registry.createChallenge',
+        fcr.registry.createChallenge,
+        [
+          ['challenger', challenger],
+          ['listingHash', argv.listingHash],
+          ['data', argv.data]
+        ]
       )
-      console.log(createChallengeTxReceipt)
-      console.log('')
 
       const listing = await fcr.registry.getListing(argv.listingHash)
       const challenge = await fcr.registry.getChallenge(listing.challengeID)
-      console.log(`Challenge created: ChallengeID=${listing.challengeID}`)
-      console.log('')
-  
-      console.log(`challenge.start({`)
-      console.log(`  lowerBound: ${argv.lowerBound},`)
-      console.log(`  upperBound: ${argv.upperBound}`)
-      console.log('})')
-      const startTxReceipt = await challenge.start(
-        challenger,
-        argv.lowerBound,
-        argv.upperBound
-      )
-      console.log(startTxReceipt)
-      console.log('')
-      console.log('Challenge started')
+      console.log(`Challenge ${listing.challengeID} created`)
       console.log('')
 
-      console.log('challenge.fund()')
+      await execSenderFunction(
+        argv,
+        `registry.getChallenge(${listing.challengeID}).start`,
+        challenge.start,
+        [
+          ['challenger', challenger],
+          ['lowerBound', argv.lowerBound],
+          ['upperBound', argv.upperBound]
+        ]
+      )
+      console.log(`Challenge ${listing.challengeID} started`)
       console.log('')
-  
-      const fundTxReceipt = await challenge.fund(challenger)
-      console.log(fundTxReceipt)
-      console.log('')
-      console.log('Challenge funded')
+
+      await execSenderFunction(
+        argv,
+        `registry.getChallenge(${listing.challengeID}).fund`,
+        challenge.fund,
+        [
+          ['challenger', challenger]
+        ]
+      )
+      console.log(`Challenge ${listing.challengeID} funded`)
       console.log('')
     }
   )
@@ -152,12 +158,16 @@ yargs
 
       const challenge = await fcr.registry.getChallenge(listing.challengeID)
 
-      const buyOutcomeTxs = await challenge.buyOutcome(
-        buyer,
-        outcome,
-        argv.amount
+      await execSenderFunction(
+        argv,
+        `registry.getChallenge(${listing.challengeID}).buyOutcome`,
+        challenge.buyOutcome,
+        [
+          ['buyer', buyer],
+          ['outcome', outcome],
+          ['amount', argv.amount]
+        ]
       )
-      console.log(buyOutcomeTxs)
     }
   )
 
@@ -226,4 +236,35 @@ function tryParseIntParam (paramName, intString) {
     throw new Error(`value for '${paramName}' is not a number`)
   }
   return int
+}
+
+async function execSenderFunction(argv, fnName, fn, fnArgs) {
+  console.log('')
+  console.log(`${fnName}({`)
+  _.forEach(fnArgs, (arg, i) => {
+    console.log(`  ${arg[0]}: '${arg[1]}'${i != fnArgs.length - 1 ? ',' : ''}`)
+  })
+  console.log(`})`)
+  console.log('')
+  const args = _.map(fnArgs, (arg) => {
+    return arg[1]
+  })
+  const txReceipts = await fn.apply(null, args)
+
+  for (const i in txReceipts) {
+    const txReceipt = txReceipts[i]
+    const txOutput = `${txReceipt.function}: ${txReceipt.receipt.transactionHash}`
+    console.log(txOutput)
+    if (argv.v) {
+      const txReceiptOutput = _.merge(
+        _.omit(txReceipt, 'receipt'),
+        {
+          receipt: _.omit(txReceipt.receipt, ['events'])
+        }
+      )
+      console.log('  transaction: ', txReceiptOutput)
+      console.log('  events: ', txReceipt.receipt.events)
+    }
+    console.log('')
+  }
 }

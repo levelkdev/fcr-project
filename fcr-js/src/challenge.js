@@ -4,6 +4,7 @@ const futarchyOracleABI = require('./abis/futarchyOracleABI')
 const categoricalEventABI = require('./abis/categoricalEventABI')
 const scalarEventABI = require('./abis/scalarEventABI')
 const standardMarketWithPriceLoggerABI = require('./abis/standardMarketWithPriceLoggerABI')
+const TransactionSender = require('./transactionSender')
 const decisions = require('./enums/decisions')
 const outcomes = require('./enums/outcomes')
 const token = require('./token')
@@ -79,15 +80,15 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
       throw new Error('challenge is already started')
     }
 
-    let startTxReceipt
-    try {
-      startTxReceipt = await contract.methods.start(lowerBound, upperBound)
-        .send(_.extend({ from: challenger }, defaultOptions))
-    } catch (err) {
-      throw new Error(`challenge.start tx failed: ${err}`)
-    }
+    const transactionSender = new TransactionSender()
+    await transactionSender.send(
+      contract,
+      'start',
+      [lowerBound, upperBound],
+      _.extend({ from: challenger }, defaultOptions)
+    )
 
-    return startTxReceipt
+    return transactionSender.response()
   }
 
   const fund = async (challenger) => {
@@ -96,28 +97,28 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
       throw new Error('challenge is already funded')
     }
 
+    const transactionSender = new TransactionSender()
+
     const stakeAmount = await contract.methods.stakeAmount().call()
-    let approveTxReceipt
-    try {
-      approveTxReceipt = await fcrToken.approve(challenger, address, stakeAmount)
-    } catch (err) {
-      throw new Error(`fcrToken.approval tx failed: ${err}`)
-    }
 
-    let fundTxReceipt
-    try {
-      fundTxReceipt = await contract.methods.fund()
-        .send(_.extend({ from: challenger }, defaultOptions))
-    } catch (err) {
-      throw new Error(`challenge.fund tx failed: ${err}`)
-    }
+    const approveTxReceipt = await fcrToken.approve(challenger, address, stakeAmount)
+    transactionSender.add(approveTxReceipt, 'approve', fcrToken.address)
 
-    return [ approveTxReceipt, fundTxReceipt ]
+    await transactionSender.send(
+      contract,
+      'fund',
+      [],
+      _.extend({ from: challenger }, defaultOptions)
+    )
+
+    return transactionSender.response()
   }
 
   const buyOutcome = async (buyer, outcome, amount) => {
     validateOutcome(outcome)
     const outcomeIndex = indexForOutcome(outcome)
+
+    const transactionSender = new TransactionSender()
 
     const isStarted = await contract.methods.isStarted().call()
     if (!isStarted) {
@@ -131,24 +132,19 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
 
     const categoricalEvent = await getCategoricalEvent()
 
-    let approveTxReceipt
-    try {
-      approveTxReceipt = await fcrToken.approve(
-        buyer,
-        categoricalEvent.options.address,
-        amount
-      )
-    } catch (err) {
-      throw new Error(`fcrToken.approval tx failed: ${err}`)
-    }
+    const approveTxReceipt = await fcrToken.approve(
+      buyer,
+      categoricalEvent.options.address,
+      amount
+    )
+    transactionSender.add(approveTxReceipt, 'approve', fcrToken.address)
 
-    let buyDecisionTokensTxReceipt
-    try {
-      buyDecisionTokensTxReceipt = await categoricalEvent.methods.buyAllOutcomes(amount)
-        .send(_.extend({ from: buyer }, defaultOptions))
-    } catch (err) {
-      throw new Error(`categoricalEvent.buyAllOutcomes tx failed: ${err}`)
-    }
+    await transactionSender.send(
+      categoricalEvent,
+      'buyAllOutcomes',
+      [ amount ],
+      _.extend({ from: buyer }, defaultOptions)
+    )
 
     const decision = decisionForOutcome(outcome)
     const decisionMarket = await getDecisionMarket(decision)
@@ -157,42 +153,26 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     const totalOutcomeCost = outcomeCost + outcomeFee
 
     const decisionToken = await getDecisionToken(decision)
-    let approveDecisionTokenTxReceipt
-    try {
-      approveDecisionTokenTxReceipt = await decisionToken.approve(
-        buyer,
-        decisionMarket.options.address,
-        totalOutcomeCost
-      )
-    } catch (err) {
-      // TODO: all tx errors should log the failed inputs .. and this
-      //       should be abstracted to some util fn
-      throw new Error(`
-        decisionToken.approve('
-          '${buyer}',
-          '${decisionMarket.options.address}',
-          '${totalOutcomeCost}'
-        ) tx failed: ${err}
-      `)
-    }
-
-    let buyOutcomeTxReceipt
-    try {
-      buyOutcomeTxReceipt = await decisionMarket.methods.buy(
-        outcomeIndex,
-        amount,
-        totalOutcomeCost
-      ).send(_.extend({ from: buyer }, defaultOptions))
-    } catch (err) {
-      throw new Error(`decisionMarket.buy tx failed: ${err}`)
-    }
-
-    return [
-      approveTxReceipt,
-      buyDecisionTokensTxReceipt,
+    
+    const approveDecisionTokenTxReceipt = await decisionToken.approve(
+      buyer,
+      decisionMarket.options.address,
+      totalOutcomeCost
+    )
+    transactionSender.add(
       approveDecisionTokenTxReceipt,
-      buyOutcomeTxReceipt
-    ]    
+      'approve',
+      decisionToken.address
+    )
+
+    await transactionSender.send(
+      decisionMarket,
+      'buy',
+      [ outcomeIndex, amount, totalOutcomeCost ],
+      _.extend({ from: buyer }, defaultOptions)
+    )
+
+    return transactionSender.response()
   }
 
   const getFutarchyOracle = async () => {
