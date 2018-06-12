@@ -101,8 +101,8 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
 
     const stakeAmount = await contract.methods.stakeAmount().call()
 
-    const approveTxReceipt = await fcrToken.approve(challenger, address, stakeAmount)
-    transactionSender.add(approveTxReceipt, 'approve', fcrToken.address)
+    const approveTxResp = await fcrToken.approve(challenger, address, stakeAmount)
+    transactionSender.add(approveTxResp[0].receipt, 'approve', fcrToken.address)
 
     await transactionSender.send(
       contract,
@@ -132,12 +132,12 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
 
     const categoricalEvent = await getCategoricalEvent()
 
-    const approveTxReceipt = await fcrToken.approve(
+    const approveTxResp = await fcrToken.approve(
       buyer,
       categoricalEvent.options.address,
       amount
     )
-    transactionSender.add(approveTxReceipt, 'approve', fcrToken.address)
+    transactionSender.add(approveTxResp[0].receipt, 'approve', fcrToken.address)
 
     await transactionSender.send(
       categoricalEvent,
@@ -154,13 +154,13 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
 
     const decisionToken = await getDecisionToken(decision)
     
-    const approveDecisionTokenTxReceipt = await decisionToken.approve(
+    const approveDecisionTokenTxResp = await decisionToken.approve(
       buyer,
       decisionMarket.options.address,
       totalOutcomeCost
     )
     transactionSender.add(
-      approveDecisionTokenTxReceipt,
+      approveDecisionTokenTxResp[0].receipt,
       'approve',
       decisionToken.address
     )

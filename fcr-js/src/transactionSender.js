@@ -4,10 +4,19 @@ module.exports = function () {
   this.transactions = []
 
   this.send = async (web3Contract, txFunctionName, inputs = [], options = {}) => {
-    const txReceipt = await web3Contract.methods[txFunctionName].apply(
-      this,
-      inputs
-    ).send(options)
+    let txReceipt
+    try {
+      txReceipt = await web3Contract.methods[txFunctionName].apply(
+        this,
+        inputs
+      ).send(options)
+    } catch (err) {
+      throw new Error(`
+        ${txFunctionName} tx error: ${err}
+          inputs: ${inputs}
+          options: ${JSON.stringify(options)}
+      `)
+    }
 
     this.add(txReceipt, txFunctionName, web3Contract.options.address)
   }

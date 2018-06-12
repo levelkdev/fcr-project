@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const eip20ABI = require('./abis/eip20ABI')
+const TransactionSender = require('./transactionSender')
 
 module.exports = (web3, address, defaultOptions) => {
   if (!defaultOptions) defaultOptions = {}
@@ -17,9 +18,14 @@ module.exports = (web3, address, defaultOptions) => {
   }
 
   const approve = async (owner, spender, value) => {
-    const tx = await contract.methods.approve(spender, value)
-      .send(_.extend({ from: owner }, defaultOptions))
-    return tx
+    const transactionSender = new TransactionSender()
+    await transactionSender.send(
+      contract,
+      'approve',
+      [ spender, value ],
+      _.extend({ from: owner }, defaultOptions)
+    )
+    return transactionSender.response()
   }
 
   return {
