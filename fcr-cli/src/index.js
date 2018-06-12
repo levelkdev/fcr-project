@@ -2,6 +2,7 @@ const _ = require('lodash')
 const yargs = require('yargs')
 const web3 = require('./web3')
 const config = require('../../fcr-config/config.json')
+const BN = web3.utils.BN;
 
 // TODO add config to the CLI to switch envs (local, ropsten, etc)
 const fcr = require('../../fcr-js/src')(web3, config.local)
@@ -165,7 +166,7 @@ yargs
         [
           ['buyer', buyer],
           ['outcome', outcome],
-          ['amount', argv.amount]
+          ['amount', toWeiUnits(argv.amount)]
         ]
       )
     }
@@ -236,6 +237,10 @@ function tryParseIntParam (paramName, intString) {
     throw new Error(`value for '${paramName}' is not a number`)
   }
   return int
+}
+
+function toWeiUnits(amount) {
+  return new BN(amount).mul(new BN('1000000000000000000')).toString()
 }
 
 async function execSenderFunction(argv, fnName, fn, fnArgs) {
