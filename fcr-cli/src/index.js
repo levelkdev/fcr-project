@@ -203,6 +203,7 @@ yargs
   )
 
   .help()
+  .showHelpOnFail(false)
   .argv
 
 async function getFromAddress (fromParamValue) {
