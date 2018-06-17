@@ -1,8 +1,8 @@
 {
   "local": {
-    "tokenAddress": "0x85a84691547b7ccf19d7c31977a7f8c0af1fb25a",
-    "registryAddress": "0x403cc7802725928652a3d116bb1781005e2e76d3",
-    "LMSRMarketMakerAddress": "0xae4c9bd0f7ae5398df05043079596e2bf0079ce9",
+    "tokenAddress": "0xa6421a7f48498cee3aeb6428a8a2dd5faa3ace2f",
+    "registryAddress": "0xa544576e64d899fee2248a52845e3b2e50c9487a",
+    "LMSRMarketMakerAddress": "0x0711b3cd383b70b42eaf6f8fc6047ebf9b99e634",
     "defaultOptions": {
       "gas": 20000000
     }
