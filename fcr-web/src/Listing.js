@@ -5,6 +5,8 @@ import React, { Component } from 'react'
 import config from 'fcr-config'
 import fcrjs from 'fcr-js/src'
 
+const BN = web3.utils.BN
+
 // TODO add config to the CLI to switch envs (local, ropsten, etc)
 const fcr = fcrjs(web3, config.local)
 
@@ -90,6 +92,10 @@ class Listing extends Component {
   async setChallengeToState () {
     const challengeStarted = await this.challenge.started()
     const challengeFunded = await this.challenge.funded()
+    const challenger = await this.challenge.contract.methods.challenger().call()
+    const stakeAmount = await this.challenge.contract.methods.stakeAmount().call()
+    const upperBound = await this.challenge.contract.methods.upperBound().call()
+    const lowerBound = await this.challenge.contract.methods.lowerBound().call()
 
     const longAcceptedPrice = await this.getAverageOutcomePrice(fcr.outcomes.LONG_ACCEPTED)
     const shortAcceptedPrice = await this.getAverageOutcomePrice(fcr.outcomes.SHORT_ACCEPTED)
@@ -100,6 +106,10 @@ class Listing extends Component {
       challenge: {
         started: challengeStarted,
         funded: challengeFunded,
+        challenger,
+        stakeAmount,
+        lowerBound,
+        upperBound,
         outcomeAveragePrices: {
           LONG_ACCEPTED: longAcceptedPrice,
           SHORT_ACCEPTED: shortAcceptedPrice,
@@ -167,6 +177,22 @@ class Listing extends Component {
             <td className={'shady'}>Funded</td>
             <td>{formatBool(this.state.challenge.funded)}</td>
           </tr>
+          <tr>
+            <td className={'shady'}>Challenger</td>
+            <td>{this.state.challenge.challenger}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>Stake</td>
+            <td>{formatWeiNumberString(this.state.challenge.stakeAmount)}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>Upper Bound</td>
+            <td>{formatWeiNumberString(this.state.challenge.upperBound)}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>Lower Bound</td>
+            <td>{formatWeiNumberString(this.state.challenge.lowerBound)}</td>
+          </tr>
         </tbody>
       </table>
     )
@@ -230,6 +256,14 @@ class Listing extends Component {
 
 function formatBool (val) {
   return val ? 'true' : 'false'
+}
+
+function formatWeiNumberString (numStr) {
+  if (numStr) {
+    return new BN(numStr).div(new BN('1000000000000000000')).toString()
+  } else {
+    return '0'
+  }
 }
 
 function getFormattedDate (timestampInSeconds) {
