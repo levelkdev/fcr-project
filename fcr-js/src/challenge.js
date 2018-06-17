@@ -74,7 +74,7 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     return funded
   }
 
-  const start = async (challenger, lowerBound, upperBound) => {
+  const start = async (challenger) => {
     const isStarted = await contract.methods.isStarted().call()
     if (isStarted) {
       throw new Error('challenge is already started')
@@ -84,7 +84,7 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     await transactionSender.send(
       contract,
       'start',
-      [lowerBound, upperBound],
+      null,
       _.extend({ from: challenger }, defaultOptions)
     )
 

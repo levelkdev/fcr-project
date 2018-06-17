@@ -55,19 +55,11 @@ yargs
   )
 
   .command(
-    'challenge <listingHash> <lowerBound> <upperBound> [data]',
+    'challenge <listingHash> [data]',
     'create a challenge for a listing',
     {
       listingHash: {
         require: true
-      },
-      lowerBound: {
-        require: true,
-        number: true
-      },
-      upperBound: {
-        require: true,
-        number: true
       },
       data: {
         default: ''
@@ -103,9 +95,7 @@ yargs
         `registry.getChallenge(${listing.challengeID}).start`,
         challenge.start,
         [
-          ['challenger', challenger],
-          ['lowerBound', argv.lowerBound],
-          ['upperBound', argv.upperBound]
+          ['challenger', challenger]
         ]
       )
       console.log(`Challenge ${listing.challengeID} started`)
