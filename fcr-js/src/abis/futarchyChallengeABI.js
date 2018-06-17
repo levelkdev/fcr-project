@@ -2,25 +2,11 @@ module.exports = [
   {
     "constant": true,
     "inputs": [],
-    "name": "centralizedOracleFactory",
+    "name": "timeToPriceResolution",
     "outputs": [
       {
         "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "ended",
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
+        "type": "uint256"
       }
     ],
     "payable": false,
@@ -86,6 +72,20 @@ module.exports = [
   {
     "constant": true,
     "inputs": [],
+    "name": "centralizedTimedOracleFactory",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
     "name": "stakeAmount",
     "outputs": [
       {
@@ -126,31 +126,13 @@ module.exports = [
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "_lowerBound",
-        "type": "int256"
-      },
-      {
-        "name": "_upperBound",
-        "type": "int256"
-      }
-    ],
-    "name": "start",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "constant": true,
     "inputs": [],
-    "name": "passed",
+    "name": "lowerBound",
     "outputs": [
       {
         "name": "",
-        "type": "bool"
+        "type": "int256"
       }
     ],
     "payable": false,
@@ -158,12 +140,17 @@ module.exports = [
     "type": "function"
   },
   {
-    "constant": false,
+    "constant": true,
     "inputs": [],
-    "name": "fund",
-    "outputs": [],
+    "name": "upperBound",
+    "outputs": [
+      {
+        "name": "",
+        "type": "int256"
+      }
+    ],
     "payable": false,
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -174,20 +161,6 @@ module.exports = [
       {
         "name": "",
         "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "tokenLockAmount",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
       }
     ],
     "payable": false,
@@ -259,11 +232,23 @@ module.exports = [
         "type": "uint256"
       },
       {
+        "name": "_timeToPriceResolution",
+        "type": "uint256"
+      },
+      {
+        "name": "_upperBound",
+        "type": "int256"
+      },
+      {
+        "name": "_lowerBound",
+        "type": "int256"
+      },
+      {
         "name": "_futarchyOracleFactory",
         "type": "address"
       },
       {
-        "name": "_centralizedOracleFactory",
+        "name": "_centralizedTimedOracleFactory",
         "type": "address"
       },
       {
@@ -318,5 +303,83 @@ module.exports = [
     ],
     "name": "_Funded",
     "type": "event"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "start",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "fund",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "ended",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "passed",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "tokenLockAmount",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "_oracle",
+        "type": "address"
+      },
+      {
+        "name": "_outcome",
+        "type": "int256"
+      }
+    ],
+    "name": "setScalarOutcome",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
   }
 ]
