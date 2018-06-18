@@ -74,6 +74,19 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     return funded
   }
 
+  const futarchyTradingPeriod = async () => {
+    const futarchyOracle = await getFutarchyOracle()
+    const tradingPeriod = await futarchyOracle.methods.tradingPeriod().call()
+    return tradingPeriod
+  }
+
+  const futarchyTradingResolutionDate = async () => {
+    const tradingPeriod = await futarchyTradingPeriod()
+    const acceptedMarket = await getDecisionMarket('ACCEPTED')
+    const marketStartDate = await acceptedMarket.methods.startDate().call()
+    return parseInt(tradingPeriod) + parseInt(marketStartDate)
+  }
+
   const start = async (challenger) => {
     const isStarted = await contract.methods.isStarted().call()
     if (isStarted) {
@@ -276,6 +289,8 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     started,
     fund,
     funded,
+    futarchyTradingPeriod,
+    futarchyTradingResolutionDate,
     buyOutcome,
     getFutarchyOracle,
     getCategoricalEvent,

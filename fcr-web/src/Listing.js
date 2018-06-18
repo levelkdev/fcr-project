@@ -22,6 +22,8 @@ class Listing extends Component {
     const listingName = web3.utils.toAscii(listingHash)
 
     this.state = {
+      loadingChallengeState: false,
+      loadedChallengeState: false,
       listingHash,
       listingName,
       listingLoaded: false,
@@ -90,57 +92,65 @@ class Listing extends Component {
   }
 
   async setChallengeToState () {
-    // TODO: why do we have to divide marginal price by this number to get
-    //       the outcomes to add up to 100 ??
-    const mysteryNumber = 0.18446744073709552
+    if(!this.state.loadingChallengeState) {
+      this.setState({ loadingChallengeState: true })
+      // TODO: why do we have to divide marginal price by this number to get
+      //       the outcomes to add up to 100 ??
+      const mysteryNumber = 0.18446744073709552
 
-    const challengeStarted = await this.challenge.started()
-    const challengeFunded = await this.challenge.funded()
-    const challenger = await this.challenge.contract.methods.challenger().call()
-    const stakeAmount = await this.challenge.contract.methods.stakeAmount().call()
-    const upperBound = await this.challenge.contract.methods.upperBound().call()
-    const lowerBound = await this.challenge.contract.methods.lowerBound().call()
+      const challengeStarted = await this.challenge.started()
+      const challengeFunded = await this.challenge.funded()
+      const challenger = await this.challenge.contract.methods.challenger().call()
+      const stakeAmount = await this.challenge.contract.methods.stakeAmount().call()
+      const upperBound = await this.challenge.contract.methods.upperBound().call()
+      const lowerBound = await this.challenge.contract.methods.lowerBound().call()
 
-    const shortAcceptedMarginalPrice =
-      await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.SHORT_ACCEPTED)
-    const longAcceptedMarginalPrice =
-      await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.LONG_ACCEPTED)
-    const shortDeniedMarginalPrice =
-      await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.SHORT_DENIED)
-    const longDeniedMarginalPrice =
-      await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.LONG_DENIED)
+      const futarchyTradingResolutionDate = await this.challenge.futarchyTradingResolutionDate()
 
-    const longAcceptedPrice = 
-      await this.challenge.getAverageOutcomePrice(fcr.outcomes.LONG_ACCEPTED)
-    const shortAcceptedPrice = 
-      await this.challenge.getAverageOutcomePrice(fcr.outcomes.SHORT_ACCEPTED)
-    const longDeniedPrice = 
-      await this.challenge.getAverageOutcomePrice(fcr.outcomes.LONG_DENIED)
-    const shortDeniedPrice = 
-      await this.challenge.getAverageOutcomePrice(fcr.outcomes.SHORT_DENIED)
+      const shortAcceptedMarginalPrice =
+        await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.SHORT_ACCEPTED)
+      const longAcceptedMarginalPrice =
+        await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.LONG_ACCEPTED)
+      const shortDeniedMarginalPrice =
+        await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.SHORT_DENIED)
+      const longDeniedMarginalPrice =
+        await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.LONG_DENIED)
 
-    this.setState({
-      challenge: {
-        started: challengeStarted,
-        funded: challengeFunded,
-        challenger,
-        stakeAmount,
-        lowerBound,
-        upperBound,
-        outcomeMarginalPrices: {
-          LONG_ACCEPTED: longAcceptedMarginalPrice / mysteryNumber,
-          SHORT_ACCEPTED: shortAcceptedMarginalPrice / mysteryNumber,
-          LONG_DENIED: longDeniedMarginalPrice / mysteryNumber,
-          SHORT_DENIED: shortDeniedMarginalPrice / mysteryNumber,
-        },
-        outcomeAveragePrices: {
-          LONG_ACCEPTED: longAcceptedPrice,
-          SHORT_ACCEPTED: shortAcceptedPrice,
-          LONG_DENIED: longDeniedPrice,
-          SHORT_DENIED: shortDeniedPrice,
+      const longAcceptedPrice = 
+        await this.challenge.getAverageOutcomePrice(fcr.outcomes.LONG_ACCEPTED)
+      const shortAcceptedPrice = 
+        await this.challenge.getAverageOutcomePrice(fcr.outcomes.SHORT_ACCEPTED)
+      const longDeniedPrice = 
+        await this.challenge.getAverageOutcomePrice(fcr.outcomes.LONG_DENIED)
+      const shortDeniedPrice = 
+        await this.challenge.getAverageOutcomePrice(fcr.outcomes.SHORT_DENIED)
+
+      this.setState({
+        loadingChallengeState: false,
+        loadedChallengeState: true,
+        challenge: {
+          started: challengeStarted,
+          funded: challengeFunded,
+          challenger,
+          stakeAmount,
+          lowerBound,
+          upperBound,
+          futarchyTradingResolutionDate,
+          outcomeMarginalPrices: {
+            LONG_ACCEPTED: longAcceptedMarginalPrice / mysteryNumber,
+            SHORT_ACCEPTED: shortAcceptedMarginalPrice / mysteryNumber,
+            LONG_DENIED: longDeniedMarginalPrice / mysteryNumber,
+            SHORT_DENIED: shortDeniedMarginalPrice / mysteryNumber,
+          },
+          outcomeAveragePrices: {
+            LONG_ACCEPTED: longAcceptedPrice,
+            SHORT_ACCEPTED: shortAcceptedPrice,
+            LONG_DENIED: longDeniedPrice,
+            SHORT_DENIED: shortDeniedPrice,
+          }
         }
-      }
-    })
+      })
+    }
   }
 
   renderDecisionMarketTable (decision) {
@@ -199,6 +209,10 @@ class Listing extends Component {
             <td>{formatBool(this.state.challenge.funded)}</td>
           </tr>
           <tr>
+            <td className={'shady'}>Futarchy Trading Period</td>
+            <td>{formatTimestamp(this.state.challenge.futarchyTradingResolutionDate)}</td>
+          </tr>
+          <tr>
             <td className={'shady'}>Challenger</td>
             <td>{this.state.challenge.challenger}</td>
           </tr>
@@ -221,18 +235,27 @@ class Listing extends Component {
 
   renderChallenge () {
     if (this.state.listingLoaded) {
-      let challengeStatusElem = this.state.challengeID > 0 ? (
-        <div>
-          {this.renderChallengeData()}
-          <br /><br />
-          {this.renderDecisionMarketData()}
-        </div>
-      ) : <div>No challenge</div>
+      let challengeElem
+      if (this.state.challengeID > 0) {
+        if (this.state.loadedChallengeState) {
+          challengeElem = (
+            <div>
+              {this.renderChallengeData()}
+              <br /><br />
+              {this.renderDecisionMarketData()}
+            </div>
+          )
+        } else {
+          challengeElem = <div>Loading...</div>
+        }
+      } else {
+        challengeElem = <div>No challenge</div>
+      }
   
       return (
         <div>
-          <h2>Challenge Status</h2>
-          {challengeStatusElem}
+          <h2>Challenge State</h2>
+          {challengeElem}
         </div>
       )
     }
