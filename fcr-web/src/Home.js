@@ -5,6 +5,7 @@ import React, { Component } from 'react'
 import ipfsAPI from 'ipfs-api'
 import config from 'fcr-config'
 import fcrjs from 'fcr-js/src'
+import { formatWeiNumberString } from './formatters'
 
 // TODO add config to the CLI to switch envs (local, ropsten, etc)
 const fcr = fcrjs(web3, config.local)
@@ -93,7 +94,7 @@ class Home extends Component {
               </tr>
               <tr>
                 <td className={'shady'}>deposit</td>
-                <td>{application.deposit}</td>
+                <td>{formatWeiNumberString(application.deposit)}</td>
               </tr>
               {challengeIdRowElem}
             </tbody>

@@ -47,7 +47,7 @@ yargs
         [
           ['applicant', applicant],
           ['listingHash', argv.listingHash],
-          ['amount', amount],
+          ['amount', toWeiUnits(amount)],
           ['data', argv.data]
         ]
       )

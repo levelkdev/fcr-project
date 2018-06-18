@@ -1,9 +1,13 @@
 import _ from 'lodash'
-import moment from 'moment'
 import web3 from './socketWeb3'
 import React, { Component } from 'react'
 import config from 'fcr-config'
 import fcrjs from 'fcr-js/src'
+import {
+  formatBool,
+  formatWeiNumberString,
+  formatTimestamp
+} from './formatters'
 
 const BN = web3.utils.BN
 
@@ -234,7 +238,7 @@ class Listing extends Component {
           </tr>
           <tr>
             <td className={'shady'}>Expires</td>
-            <td>{getFormattedDate(this.state.applicationExpiry)}</td>
+            <td>{formatTimestamp(this.state.applicationExpiry)}</td>
           </tr>
         </tbody>
       </table>
@@ -252,23 +256,6 @@ class Listing extends Component {
       </div>
     )
   }
-}
-
-function formatBool (val) {
-  return val ? 'true' : 'false'
-}
-
-function formatWeiNumberString (numStr) {
-  if (numStr) {
-    return new BN(numStr).div(new BN('1000000000000000000')).toString()
-  } else {
-    return '0'
-  }
-}
-
-function getFormattedDate (timestampInSeconds) {
-  const unixTimestamp = parseInt(timestampInSeconds) * 1000
-  return moment(unixTimestamp).format("dddd, MMMM Do YYYY, h:mm:ss a")
 }
 
 export default Listing
