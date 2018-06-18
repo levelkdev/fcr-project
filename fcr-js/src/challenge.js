@@ -224,6 +224,23 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     return outcomeCost
   }
 
+  const calculateOutcomeMarginalPrice = async (outcome) => {
+    validateOutcome(outcome)
+
+    const outcomeTokenIndex = indexForOutcome(outcome)
+
+    const decisionMarket = await getDecisionMarket(
+      decisionForOutcome(outcome)
+    )
+
+    const outcomeMarginalPrice = await LMSR.methods.calcMarginalPrice(
+      decisionMarket.options.address,
+      outcomeTokenIndex
+    ).call()
+
+    return outcomeMarginalPrice
+  }
+
   const calculateOutcomeFee = async (outcome, amount) => {
     const decision = decisionForOutcome(outcome)
     const outcomeCost = await calculateOutcomeCost(outcome, amount)
@@ -266,6 +283,7 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     getDecisionEvent,
     getDecisionToken,
     calculateOutcomeCost,
+    calculateOutcomeMarginalPrice,
     calculateOutcomeFee,
     getAverageOutcomePrice,
     watchStarted: watchEventFn(contract, '_Started'),

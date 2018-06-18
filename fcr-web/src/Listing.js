@@ -26,6 +26,7 @@ class Listing extends Component {
       listingName,
       listingLoaded: false,
       challenge: {
+        outcomeMarginalPrices: {},
         outcomeAveragePrices: {}
       }
     }
@@ -88,12 +89,11 @@ class Listing extends Component {
     this.setChallengeToState()
   }
 
-  async getAverageOutcomePrice (outcome) {
-    const avgPrice = await this.challenge.getAverageOutcomePrice(outcome)
-    return Math.round(avgPrice / 10 ** 14) / 10 ** 6
-  }
-
   async setChallengeToState () {
+    // TODO: why do we have to divide marginal price by this number to get
+    //       the outcomes to add up to 100 ??
+    const mysteryNumber = 0.18446744073709552
+
     const challengeStarted = await this.challenge.started()
     const challengeFunded = await this.challenge.funded()
     const challenger = await this.challenge.contract.methods.challenger().call()
@@ -101,10 +101,23 @@ class Listing extends Component {
     const upperBound = await this.challenge.contract.methods.upperBound().call()
     const lowerBound = await this.challenge.contract.methods.lowerBound().call()
 
-    const longAcceptedPrice = await this.getAverageOutcomePrice(fcr.outcomes.LONG_ACCEPTED)
-    const shortAcceptedPrice = await this.getAverageOutcomePrice(fcr.outcomes.SHORT_ACCEPTED)
-    const longDeniedPrice = await this.getAverageOutcomePrice(fcr.outcomes.LONG_DENIED)
-    const shortDeniedPrice = await this.getAverageOutcomePrice(fcr.outcomes.SHORT_DENIED)
+    const shortAcceptedMarginalPrice =
+      await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.SHORT_ACCEPTED)
+    const longAcceptedMarginalPrice =
+      await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.LONG_ACCEPTED)
+    const shortDeniedMarginalPrice =
+      await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.SHORT_DENIED)
+    const longDeniedMarginalPrice =
+      await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.LONG_DENIED)
+
+    const longAcceptedPrice = 
+      await this.challenge.getAverageOutcomePrice(fcr.outcomes.LONG_ACCEPTED)
+    const shortAcceptedPrice = 
+      await this.challenge.getAverageOutcomePrice(fcr.outcomes.SHORT_ACCEPTED)
+    const longDeniedPrice = 
+      await this.challenge.getAverageOutcomePrice(fcr.outcomes.LONG_DENIED)
+    const shortDeniedPrice = 
+      await this.challenge.getAverageOutcomePrice(fcr.outcomes.SHORT_DENIED)
 
     this.setState({
       challenge: {
@@ -114,6 +127,12 @@ class Listing extends Component {
         stakeAmount,
         lowerBound,
         upperBound,
+        outcomeMarginalPrices: {
+          LONG_ACCEPTED: longAcceptedMarginalPrice / mysteryNumber,
+          SHORT_ACCEPTED: shortAcceptedMarginalPrice / mysteryNumber,
+          LONG_DENIED: longDeniedMarginalPrice / mysteryNumber,
+          SHORT_DENIED: shortDeniedMarginalPrice / mysteryNumber,
+        },
         outcomeAveragePrices: {
           LONG_ACCEPTED: longAcceptedPrice,
           SHORT_ACCEPTED: shortAcceptedPrice,
@@ -124,43 +143,41 @@ class Listing extends Component {
     })
   }
 
+  renderDecisionMarketTable (decision) {
+    return (
+      <table>
+        <tbody>
+          <tr>
+            <td colSpan="2">{decision}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>{`LONG_${decision}`}</td>
+            <td>{formatWeiNumberString(this.state.challenge.outcomeMarginalPrices[`LONG_${decision}`])}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>{`SHORT_${decision}`}</td>
+            <td>{formatWeiNumberString(this.state.challenge.outcomeMarginalPrices[`SHORT_${decision}`])}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>{`LONG_${decision} Avg.`}</td>
+            <td>{formatWeiNumberString(this.state.challenge.outcomeAveragePrices[`LONG_${decision}`])}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>{`SHORT_${decision} Avg.`}</td>
+            <td>{formatWeiNumberString(this.state.challenge.outcomeAveragePrices[`SHORT_${decision}`])}</td>
+          </tr>
+        </tbody>
+      </table>
+    )
+  }
+
   renderDecisionMarketData () {
     return (
       <div>
         <h3>Decision Markets</h3>
-        <table>
-          <tbody>
-            <tr>
-              <td colSpan="2">ACCEPTED</td>
-            </tr>
-            <tr>
-              <td className={'shady'}>LONG_ACCEPTED</td>
-              <td>{this.state.challenge.outcomeAveragePrices.LONG_ACCEPTED}</td>
-            </tr>
-            <tr>
-              <td className={'shady'}>SHORT_ACCEPTED</td>
-              <td>{this.state.challenge.outcomeAveragePrices.SHORT_ACCEPTED}</td>
-            </tr>
-          </tbody>
-        </table>
-
+        {this.renderDecisionMarketTable('ACCEPTED')}
         <br /><br />
-
-        <table>
-          <tbody>
-            <tr>
-              <td colSpan="2">DENIED</td>
-            </tr>
-            <tr>
-              <td className={'shady'}>LONG_DENIED</td>
-              <td>{this.state.challenge.outcomeAveragePrices.LONG_DENIED}</td>
-            </tr>
-            <tr>
-              <td className={'shady'}>SHORT_DENIED</td>
-              <td>{this.state.challenge.outcomeAveragePrices.SHORT_DENIED}</td>
-            </tr>
-          </tbody>
-        </table>
+        {this.renderDecisionMarketTable('DENIED')}
       </div>
     )
   }
