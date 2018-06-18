@@ -1,7 +1,5 @@
 import moment from 'moment'
-import web3 from './web3'
-
-const BN = web3.utils.BN
+import Decimal from 'decimal.js'
 
 export function formatBool (val) {
   return val ? 'true' : 'false'
@@ -9,7 +7,9 @@ export function formatBool (val) {
 
 export function formatWeiNumberString (numStr) {
   if (numStr) {
-    return new BN(numStr).div(new BN('1000000000000000000')).toString()
+    const d = new Decimal(numStr).div(10 ** 18)
+    Decimal.set({ toExpNeg: -32, toExpPos: 32 })
+    return d.toString()
   } else {
     return '0'
   }

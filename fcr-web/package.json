@@ -5,6 +5,9 @@
   "dependencies": {
     "bootstrap": "^3.3.6",
     "bytes": "^3.0.0",
+    "decimal.js": "^10.0.1",
+    "fcr-config": "file:../fcr-config",
+    "fcr-js": "file:../fcr-js",
     "ipfs-api": "^22.0.0",
     "lodash": "^4.17.10",
     "moment": "^2.22.1",
@@ -14,9 +17,7 @@
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.4",
     "sha256": "^0.2.0",
-    "web3": "^1.0.0-beta.26",
-    "fcr-config": "file:../fcr-config",
-    "fcr-js": "file:../fcr-js"
+    "web3": "^1.0.0-beta.26"
   },
   "scripts": {
     "start": "react-scripts start",
