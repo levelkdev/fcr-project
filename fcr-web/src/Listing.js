@@ -234,7 +234,7 @@ class Listing extends Component {
           </tr>
           <tr>
             <td className={'shady'}>Deposit</td>
-            <td>{this.state.deposit}</td>
+            <td>{formatWeiNumberString(this.state.deposit)}</td>
           </tr>
           <tr>
             <td className={'shady'}>Expires</td>

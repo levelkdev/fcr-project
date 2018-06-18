@@ -5,7 +5,7 @@ import React, { Component } from 'react'
 import ipfsAPI from 'ipfs-api'
 import config from 'fcr-config'
 import fcrjs from 'fcr-js/src'
-import { formatWeiNumberString } from './formatters'
+import { formatWeiNumberString, formatTimestamp } from './formatters'
 
 // TODO add config to the CLI to switch envs (local, ropsten, etc)
 const fcr = fcrjs(web3, config.local)
@@ -70,7 +70,7 @@ class Home extends Component {
       const challengeIdRowElem = application.challengeID > 0 ? 
         (
           <tr>
-            <td className={'shady'}>challengeID</td>
+            <td className={'shady'}>Challenge ID</td>
             <td>{application.challengeID}</td>
           </tr>
         ) : null
@@ -85,15 +85,15 @@ class Home extends Component {
                 </td>
               </tr>
               <tr>
-                <td className={'shady'}>appEndDate</td>
-                <td>{application.appEndDate}</td>
+                <td className={'shady'}>Application End Date</td>
+                <td>{formatTimestamp(application.appEndDate)}</td>
               </tr>
               <tr>
-                <td className={'shady'}>applicant</td>
+                <td className={'shady'}>Applicant</td>
                 <td>{application.applicant}</td>
               </tr>
               <tr>
-                <td className={'shady'}>deposit</td>
+                <td className={'shady'}>Deposit</td>
                 <td>{formatWeiNumberString(application.deposit)}</td>
               </tr>
               {challengeIdRowElem}
