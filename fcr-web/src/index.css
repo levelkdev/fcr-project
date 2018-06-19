@@ -9,6 +9,17 @@ body {
     width: 50%;
 }
 
+.topnav {
+    padding: 15px 20px;
+    background: gainsboro;
+    margin: -10px -10px 0px -10px;
+    border-bottom: 1px solid #c1c1c1;
+}
+
+.content {
+    margin: 10px;
+}
+
 /* Clear floats after the columns */
 .row:after {
     content: "";

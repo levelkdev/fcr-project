@@ -23,8 +23,6 @@ class App extends Component {
         <div className="appContainer">
 
           <div className="topnav">
-            <div className="header-brand nav-left">Registry</div>
-
             <div className="nav-right">
               <NavLink to="/home">Home</NavLink>
             </div>
