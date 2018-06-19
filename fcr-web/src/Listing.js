@@ -141,10 +141,10 @@ class Listing extends Component {
             SHORT_DENIED: shortDeniedMarginalPrice / (fixedPointONE / 10 ** 18),
           },
           outcomeAveragePrices: {
-            LONG_ACCEPTED: longAcceptedPrice,
-            SHORT_ACCEPTED: shortAcceptedPrice,
-            LONG_DENIED: longDeniedPrice,
-            SHORT_DENIED: shortDeniedPrice,
+            LONG_ACCEPTED: longAcceptedPrice / (fixedPointONE / 10 ** 18),
+            SHORT_ACCEPTED: shortAcceptedPrice / (fixedPointONE / 10 ** 18),
+            LONG_DENIED: longDeniedPrice / (fixedPointONE / 10 ** 18),
+            SHORT_DENIED: shortDeniedPrice / (fixedPointONE / 10 ** 18),
           }
         }
       })

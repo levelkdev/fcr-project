@@ -266,7 +266,10 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     const decision = decisionForOutcome(outcome)
     const decisionMarket = await getDecisionMarket(decision)
     const averageLongPrice = await decisionMarket.methods.getAvgPrice().call()
-    return indexForOutcome(outcome) == 1 ? averageLongPrice : (10 ** 20) - averageLongPrice
+
+    return indexForOutcome(outcome) == 1 ? 
+      averageLongPrice :
+      (2 ** 64) - averageLongPrice
   }
 
   const watchOutcomeTokenPurchases = async (filter, callback, errCallback) => {
