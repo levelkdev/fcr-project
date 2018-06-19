@@ -10,10 +10,28 @@ body {
 }
 
 .topnav {
+    position: relative;
     padding: 15px 20px;
     background: gainsboro;
     margin: -10px -10px 0px -10px;
     border-bottom: 1px solid #c1c1c1;
+}
+
+.topnav ul li {
+    list-style: none;
+    display: inline-block;
+    padding-left: 25px;
+}
+
+.topnav ul li .time-display {
+    display: inline-block;
+}
+
+.nav-right {
+    position: absolute;
+    right: 20px;
+    top: 0;
+    bottom: 0;
 }
 
 .content {

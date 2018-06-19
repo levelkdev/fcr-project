@@ -17,5 +17,5 @@ export function formatWeiNumberString (numStr) {
 
 export function formatTimestamp (timestampInSeconds) {
   const unixTimestamp = parseInt(timestampInSeconds) * 1000
-  return moment(unixTimestamp).format("dddd, MMMM Do YYYY, h:mm:ss a")
+  return moment(unixTimestamp).format("MMMM Do YYYY, h:mm:ss a")
 }
