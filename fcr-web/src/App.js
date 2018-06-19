@@ -75,7 +75,9 @@ class App extends Component {
           <div className="content">
             <Route exact path="/" component={Home}/>
             <Route exact path="/home" component={Home}/>
-            <Route exact path="/listings/:listingHash" component={Listing}/>
+            <Route exact path="/listings/:listingHash" render={props => (
+              <Listing {...props} blockTime={this.state.latestBlockTime} />
+            )}/>
           </div>
 
         </div>

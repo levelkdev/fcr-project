@@ -19,3 +19,14 @@ export function formatTimestamp (timestampInSeconds) {
   const unixTimestamp = parseInt(timestampInSeconds) * 1000
   return moment(unixTimestamp).format("MMMM Do YYYY, h:mm:ss a")
 }
+
+export function formatDuration (startTime, endTime) {
+  const duration = (parseInt(startTime) - parseInt(endTime)) * 1000
+  if (duration > 0) {
+    const dur = moment.duration(duration)
+    const h = dur.hours()
+    const m = dur.minutes()
+    const s = dur.seconds()
+    return `${h} hour${h == 1 ? '' : 's'} : ${dur.minutes()} minute${m == 1 ? '' : 's'} : ${dur.seconds()} second${s == 1 ? '' : 's'}`
+  }
+}

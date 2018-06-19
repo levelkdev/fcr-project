@@ -8,6 +8,7 @@ import {
   formatWeiNumberString,
   formatTimestamp
 } from './formatters'
+import TimeRemainingDisplay from './Components/TimeRemainingDisplay'
 
 const BN = web3.utils.BN
 
@@ -207,8 +208,17 @@ class Listing extends Component {
             <td>{formatBool(this.state.challenge.funded)}</td>
           </tr>
           <tr>
-            <td className={'shady'}>Futarchy Trading Period</td>
+            <td className={'shady'}>Futarchy: Resolution</td>
             <td>{formatTimestamp(this.state.challenge.futarchyTradingResolutionDate)}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>Futarchy: Time Remaining</td>
+            <td>
+              <TimeRemainingDisplay
+                startTime={this.state.challenge.futarchyTradingResolutionDate}
+                endTime={this.props.blockTime}
+              />
+            </td>
           </tr>
           <tr>
             <td className={'shady'}>Challenger</td>
