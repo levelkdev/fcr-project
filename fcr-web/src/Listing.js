@@ -94,9 +94,7 @@ class Listing extends Component {
   async setChallengeToState () {
     if(!this.state.loadingChallengeState) {
       this.setState({ loadingChallengeState: true })
-      // TODO: why do we have to divide marginal price by this number to get
-      //       the outcomes to add up to 100 ??
-      const mysteryNumber = 0.18446744073709552
+      const fixedPointONE = 2 ** 64
 
       const challengeStarted = await this.challenge.started()
       const challengeFunded = await this.challenge.funded()
@@ -137,10 +135,10 @@ class Listing extends Component {
           upperBound,
           futarchyTradingResolutionDate,
           outcomeMarginalPrices: {
-            LONG_ACCEPTED: longAcceptedMarginalPrice / mysteryNumber,
-            SHORT_ACCEPTED: shortAcceptedMarginalPrice / mysteryNumber,
-            LONG_DENIED: longDeniedMarginalPrice / mysteryNumber,
-            SHORT_DENIED: shortDeniedMarginalPrice / mysteryNumber,
+            LONG_ACCEPTED: longAcceptedMarginalPrice / (fixedPointONE / 10 ** 18),
+            SHORT_ACCEPTED: shortAcceptedMarginalPrice / (fixedPointONE / 10 ** 18),
+            LONG_DENIED: longDeniedMarginalPrice / (fixedPointONE / 10 ** 18),
+            SHORT_DENIED: shortDeniedMarginalPrice / (fixedPointONE / 10 ** 18),
           },
           outcomeAveragePrices: {
             LONG_ACCEPTED: longAcceptedPrice,
