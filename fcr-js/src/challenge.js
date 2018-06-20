@@ -4,6 +4,7 @@ const futarchyOracleABI = require('./abis/futarchyOracleABI')
 const categoricalEventABI = require('./abis/categoricalEventABI')
 const scalarEventABI = require('./abis/scalarEventABI')
 const standardMarketWithPriceLoggerABI = require('./abis/standardMarketWithPriceLoggerABI')
+const timedOracleABI = require('./abis/timedOracleABI')
 const TransactionSender = require('./transactionSender')
 const decisions = require('./enums/decisions')
 const outcomes = require('./enums/outcomes')
@@ -85,6 +86,16 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     const acceptedMarket = await getDecisionMarket('ACCEPTED')
     const marketStartDate = await acceptedMarket.methods.startDate().call()
     return parseInt(tradingPeriod) + parseInt(marketStartDate)
+  }
+
+  const conditionalTradingPeriod = async () => {
+    const timedOracle = await getTimedOracle()
+  }
+
+  const conditionalTradingResolutionDate = async () => {
+    const timedOracle = await getTimedOracle()
+    const resolutionDate = await timedOracle.methods.resolutionDate().call()
+    return resolutionDate
   }
 
   const start = async (challenger) => {
@@ -219,6 +230,12 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     return token(web3, decisionTokenAddress, defaultOptions)
   }
 
+  const getTimedOracle = async () => {
+    const decisionEvent = await getDecisionEvent('ACCEPTED')
+    const timedOracleAddress = await decisionEvent.methods.oracle().call()
+    return new web3.eth.Contract(timedOracleABI, timedOracleAddress)
+  }
+
   const calculateOutcomeCost = async (outcome, amount) => {
     validateOutcome(outcome)
 
@@ -294,12 +311,15 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     funded,
     futarchyTradingPeriod,
     futarchyTradingResolutionDate,
+    conditionalTradingPeriod,
+    conditionalTradingResolutionDate,
     buyOutcome,
     getFutarchyOracle,
     getCategoricalEvent,
     getDecisionMarket,
     getDecisionEvent,
     getDecisionToken,
+    getTimedOracle,
     calculateOutcomeCost,
     calculateOutcomeMarginalPrice,
     calculateOutcomeFee,

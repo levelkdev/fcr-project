@@ -105,6 +105,7 @@ class Listing extends Component {
       const lowerBound = await this.challenge.contract.methods.lowerBound().call()
 
       const futarchyTradingResolutionDate = await this.challenge.futarchyTradingResolutionDate()
+      const conditionalTradingResolutionDate = await this.challenge.conditionalTradingResolutionDate()
 
       const shortAcceptedMarginalPrice =
         await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.SHORT_ACCEPTED)
@@ -135,6 +136,7 @@ class Listing extends Component {
           lowerBound,
           upperBound,
           futarchyTradingResolutionDate,
+          conditionalTradingResolutionDate,
           outcomeMarginalPrices: {
             LONG_ACCEPTED: longAcceptedMarginalPrice / (fixedPointONE / 10 ** 18),
             SHORT_ACCEPTED: shortAcceptedMarginalPrice / (fixedPointONE / 10 ** 18),
@@ -216,6 +218,19 @@ class Listing extends Component {
             <td>
               <TimeRemainingDisplay
                 startTime={this.state.challenge.futarchyTradingResolutionDate}
+                endTime={this.props.blockTime}
+              />
+            </td>
+          </tr>
+          <tr>
+            <td className={'shady'}>Conditional: Resolution</td>
+            <td>{formatTimestamp(this.state.challenge.conditionalTradingResolutionDate)}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>Conditional: Time Remaining</td>
+            <td>
+              <TimeRemainingDisplay
+                startTime={this.state.challenge.conditionalTradingResolutionDate}
                 endTime={this.props.blockTime}
               />
             </td>
