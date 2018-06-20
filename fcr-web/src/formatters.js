@@ -28,6 +28,6 @@ export function formatDuration (startTime, endTime) {
     const h = dur.hours()
     const m = dur.minutes()
     const s = dur.seconds()
-    return `${d} day${h == 1 ? '' : 's'} : ${h} hour${h == 1 ? '' : 's'} : ${dur.minutes()} minute${m == 1 ? '' : 's'} : ${dur.seconds()} second${s == 1 ? '' : 's'}`
+    return `${d} day${d == 1 ? '' : 's'} : ${h} hour${h == 1 ? '' : 's'} : ${dur.minutes()} minute${m == 1 ? '' : 's'} : ${dur.seconds()} second${s == 1 ? '' : 's'}`
   }
 }
