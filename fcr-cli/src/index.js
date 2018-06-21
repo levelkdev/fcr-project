@@ -162,6 +162,41 @@ yargs
     }
   )
 
+  .command(
+    'close <listingHash>',
+    'close the challenge',
+    {
+      listingHash: {
+        require: true
+      },
+      from: {
+        default: '0',
+        number: true
+      }
+    },
+    async (argv) => {
+      const sender = await getFromAddress(argv.from)
+
+      // TODO: DRY this?
+      const listing = await fcr.registry.getListing(argv.listingHash)
+      if (parseInt(listing.challengeID) == 0) {
+        console.log(`No challenge for listing '${argv.listingHash}'`)
+        return
+      }
+
+      const challenge = await fcr.registry.getChallenge(listing.challengeID)
+
+      await execSenderFunction(
+        argv,
+        `registry.getChallenge(${listing.challengeID}).setOutcome`,
+        challenge.setOutcome,
+        [
+          ['sender', sender]
+        ]
+      )
+    }
+  )
+
   .command({
     command: 'registryName',
     desc: 'get the name of the registry',

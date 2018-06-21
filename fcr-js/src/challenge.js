@@ -32,6 +32,12 @@ function validateOutcome (outcome) {
   }
 }
 
+async function getBlockTime(web3) {
+  const blockNumber = await web3.eth.getBlockNumber()
+  const block = await web3.eth.getBlock(blockNumber)
+  return block.timestamp
+}
+
 // TODO: DRY this up
 function watchEventFn (contract, eventName) {
   return (filter, callback, errCallback) => {
@@ -210,6 +216,31 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     return transactionSender.response()
   }
 
+  const setOutcome = async (sender) => {
+    const transactionSender = new TransactionSender()
+
+    const futarchyOracle = await getFutarchyOracle()
+    const isOutcomeSest = await futarchyOracle.methods.isOutcomeSet().call()
+    if (isOutcomeSest) {
+      throw new Error('challenge outcome has already been set')
+    }
+
+    const resolutionDate = await futarchyTradingResolutionDate()
+    const blockTime = await getBlockTime(web3)
+    if (blockTime < resolutionDate) {
+      throw new Error('challenge decision period is still active')
+    }
+
+    await transactionSender.send(
+      futarchyOracle,
+      'setOutcome',
+      [],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    return transactionSender.response()
+  }
+
   const getFutarchyOracle = async () => {
     const futarchyOracleAddress = await contract.methods.futarchyOracle().call()
     return new web3.eth.Contract(futarchyOracleABI, futarchyOracleAddress)
@@ -315,6 +346,15 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     )
   }
 
+  const watchSetOutcome = async (filter, callback, errCallback) => {
+    const futarchyOracle = await getFutarchyOracle()
+    watchEventFn(futarchyOracle, 'OutcomeAssignment')(
+      filter,
+      callback,
+      errCallback
+    )
+  }
+
   return {
     start,
     started,
@@ -326,6 +366,7 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     conditionalTradingPeriod,
     conditionalTradingResolutionDate,
     buyOutcome,
+    setOutcome,
     getFutarchyOracle,
     getCategoricalEvent,
     getDecisionMarket,
@@ -339,6 +380,7 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     watchStarted: watchEventFn(contract, '_Started'),
     watchFunded: watchEventFn(contract, '_Funded'),
     watchOutcomeTokenPurchases,
+    watchSetOutcome,
     address,
     contract
   }

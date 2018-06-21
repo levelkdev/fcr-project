@@ -86,6 +86,14 @@ class Listing extends Component {
         },
         console.error
       )
+
+      this.challenge.watchSetOutcome(
+        {},
+        (event) => {
+          this.setChallengeToState()
+        },
+        console.error
+      )
     }
 
     this.setState({ challengeID })
