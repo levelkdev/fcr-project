@@ -106,6 +106,7 @@ class Listing extends Component {
 
       const futarchyTradingResolutionDate = await this.challenge.futarchyTradingResolutionDate()
       const conditionalTradingResolutionDate = await this.challenge.conditionalTradingResolutionDate()
+      const futarchyOutcome = await this.challenge.futarchyOutcome()
 
       const shortAcceptedMarginalPrice =
         await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.SHORT_ACCEPTED)
@@ -137,6 +138,7 @@ class Listing extends Component {
           upperBound,
           futarchyTradingResolutionDate,
           conditionalTradingResolutionDate,
+          futarchyOutcome,
           outcomeMarginalPrices: {
             LONG_ACCEPTED: longAcceptedMarginalPrice / (fixedPointONE / 10 ** 18),
             SHORT_ACCEPTED: shortAcceptedMarginalPrice / (fixedPointONE / 10 ** 18),
@@ -194,6 +196,14 @@ class Listing extends Component {
   }
 
   renderChallengeData () {
+    let futarchyOutcome
+    if (this.state.challenge.futarchyOutcome == 0) {
+      futarchyOutcome = 'Passed'
+    } else if (this.state.challenge.futarchyOutcome == 1) {
+      futarchyOutcome = 'Failed'
+    } else {
+      futarchyOutcome = 'None'
+    }
     return (
       <table>
         <tbody>
@@ -251,6 +261,35 @@ class Listing extends Component {
             <td className={'shady'}>Lower Bound</td>
             <td>{formatWeiNumberString(this.state.challenge.lowerBound)}</td>
           </tr>
+          <tr>
+            <td className={'shady'}>Futarchy Outcome</td>
+            <td>{futarchyOutcome}</td>
+          </tr>
+        </tbody>
+      </table>
+    )
+  }
+
+  renderChallengeStatus () {
+    const { challenge } = this.state
+    const { outcomeAveragePrices } = challenge
+    const decisionPeriodStatus = challenge.futarchyTradingResolutionDate > this.props.blockTime ?
+      'ACTIVE' : 'CLOSED'
+    const challengePassing = outcomeAveragePrices.LONG_ACCEPTED > outcomeAveragePrices.LONG_DENIED
+    const outcomeStatus = decisionPeriodStatus == 'ACTIVE' ? 
+      (challengePassing ? 'PASSING' : 'FAILING') :
+      (challengePassing ? 'PASSED' : 'FAILED')
+    return (
+      <table>
+        <tbody>
+          <tr>
+            <td className={'shady'}>Status</td>
+            <td>{outcomeStatus}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>Decision Period</td>
+            <td>{decisionPeriodStatus}</td>
+          </tr>
         </tbody>
       </table>
     )
@@ -263,6 +302,11 @@ class Listing extends Component {
         if (this.state.loadedChallengeState) {
           challengeElem = (
             <div>
+              <div>
+                {this.renderChallengeStatus()}
+              </div>
+              <br />
+              <h3>Challenge Data</h3>
               {this.renderChallengeData()}
               <br /><br />
               {this.renderDecisionMarketData()}

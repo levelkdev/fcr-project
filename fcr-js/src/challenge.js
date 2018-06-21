@@ -75,6 +75,17 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     return funded
   }
 
+  const futarchyOutcome = async () => {
+    const futarchyOracle = await getFutarchyOracle()
+    const isOutcomeSet = await futarchyOracle.methods.isOutcomeSet().call()
+    if (isOutcomeSet) {
+      const outcome = await futarchyOracle.methods.getOutcome().call()
+      return outcome
+    } else {
+      return null
+    }
+  }
+
   const futarchyTradingPeriod = async () => {
     const futarchyOracle = await getFutarchyOracle()
     const tradingPeriod = await futarchyOracle.methods.tradingPeriod().call()
@@ -309,6 +320,7 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
     started,
     fund,
     funded,
+    futarchyOutcome,
     futarchyTradingPeriod,
     futarchyTradingResolutionDate,
     conditionalTradingPeriod,
