@@ -31,7 +31,8 @@ class Listing extends Component {
       challenge: {
         outcomeMarginalPrices: {},
         outcomeAveragePrices: {}
-      }
+      },
+      trades: []
     }
     
     this.challenge = null
@@ -82,6 +83,7 @@ class Listing extends Component {
       this.challenge.watchOutcomeTokenPurchases(
         {},
         (event) => {
+          this.addTradeToState(event.returnValues)
           this.setChallengeToState()
         },
         console.error
@@ -98,6 +100,12 @@ class Listing extends Component {
 
     this.setState({ challengeID })
     this.setChallengeToState()
+  }
+
+  async addTradeToState (tradeData) {
+    this.setState({
+      trades: _.concat(this.state.trades, [tradeData])
+    })
   }
 
   async setChallengeToState () {
@@ -199,6 +207,39 @@ class Listing extends Component {
         {this.renderDecisionMarketTable('ACCEPTED')}
         <br /><br />
         {this.renderDecisionMarketTable('DENIED')}
+      </div>
+    )
+  }
+
+  renderTradeData () {
+    let i = 0
+    const tradeRows = this.state.trades.map((trade) => {
+      i++
+      return (
+        <tr key={`trade_${i}`}>
+          <td>{trade.buyer}</td>
+          <td>{trade.outcomeTokenIndex}</td>
+          <td>{formatWeiNumberString(trade.outcomeTokenCost)}</td>
+          <td>{formatWeiNumberString(trade.outcomeTokenCount)}</td>
+          <td>{formatWeiNumberString(trade.marketFees)}</td>
+        </tr>
+      )
+    })
+    return (
+      <div>
+        <h3>Trades</h3>
+        <table>
+          <tbody>
+            <tr>
+              <td className={'shady'}>Buyer</td>
+              <td className={'shady'}>Outcome Token</td>
+              <td className={'shady'}>Cost</td>
+              <td className={'shady'}>Count</td>
+              <td className={'shady'}>Fees</td>
+            </tr>
+            {tradeRows}
+          </tbody>
+        </table>
       </div>
     )
   }
@@ -318,6 +359,8 @@ class Listing extends Component {
               {this.renderChallengeData()}
               <br /><br />
               {this.renderDecisionMarketData()}
+              <br /><br />
+              {this.renderTradeData()}
             </div>
           )
         } else {
