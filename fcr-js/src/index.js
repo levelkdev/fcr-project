@@ -3,6 +3,7 @@ const registry = require('./registry')
 const LMSRMarketMakerABI = require('./abis/LMSRMarketMakerABI')
 const decisions = require('./enums/decisions')
 const outcomes = require('./enums/outcomes')
+const outcomeTokens = require('./enums/outcomeTokens')
 
 module.exports = (web3, config) => {
   const tokenInstance = token(web3, config.tokenAddress, config.defaultOptions)
@@ -21,6 +22,7 @@ module.exports = (web3, config) => {
       config.defaultOptions
     ),
     decisions,
-    outcomes
+    outcomes,
+    outcomeTokens
   }
 }

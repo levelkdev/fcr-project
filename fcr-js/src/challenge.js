@@ -334,15 +334,18 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
   const watchOutcomeTokenPurchases = async (filter, callback, errCallback) => {
     const acceptedDecisionMarket = await getDecisionMarket('ACCEPTED')
     const deniedDecisionMarket = await getDecisionMarket('DENIED')
+    function callbackFn () {
+      
+    }
     watchEventFn(acceptedDecisionMarket, 'OutcomeTokenPurchase')(
       filter,
-      callback,
-      errCallback
+      function () { callback.apply(this, _.concat(['ACCEPTED'], arguments)) },
+      function () { errCallback.apply(this, _.concat(['ACCEPTED'], arguments)) }
     )
     watchEventFn(deniedDecisionMarket, 'OutcomeTokenPurchase')(
       filter,
-      callback,
-      errCallback
+      function () { callback.apply(this, _.concat(['DENIED'], arguments)) },
+      function () { errCallback.apply(this, _.concat(['DENIED'], arguments)) }
     )
   }
 
