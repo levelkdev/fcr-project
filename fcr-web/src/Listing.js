@@ -10,6 +10,7 @@ import {
   formatTimestamp
 } from './formatters'
 import TimeRemainingDisplay from './Components/TimeRemainingDisplay'
+import ShortAddress from './Components/ShortAddress'
 
 const BN = web3.utils.BN
 
@@ -231,7 +232,9 @@ class Listing extends Component {
                 i++
                 return (
                   <tr key={`trade_${i}`}>
-                    <td>{trade.buyer}</td>
+                    <td>
+                      <ShortAddress address={trade.buyer} />
+                    </td>
                     <td>
                       {`${fcr.outcomeTokens[trade.outcomeTokenIndex]}_${trade.decisionMarket}`}
                     </td>
@@ -305,7 +308,9 @@ class Listing extends Component {
           </tr>
           <tr>
             <td className={'shady'}>Challenger</td>
-            <td>{this.state.challenge.challenger}</td>
+            <td>
+              <ShortAddress address={this.state.challenge.challenger} />
+            </td>
           </tr>
           <tr>
             <td className={'shady'}>Stake</td>
@@ -397,7 +402,9 @@ class Listing extends Component {
         <tbody>
           <tr>
             <td className={'shady'}>Owner</td>
-            <td>{this.state.owner}</td>
+            <td>
+              <ShortAddress address={this.state.owner} />
+            </td>
           </tr>
           <tr>
             <td className={'shady'}>Deposit</td>

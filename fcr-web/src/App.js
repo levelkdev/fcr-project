@@ -1,6 +1,7 @@
 
 import React, { Component } from 'react'
 import { Button } from 'react-bootstrap'
+import './fontawesome/css/all.css'
 import './App.css'
 import {
   Route,

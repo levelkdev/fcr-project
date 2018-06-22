@@ -6,6 +6,7 @@ import ipfsAPI from 'ipfs-api'
 import config from 'fcr-config'
 import fcrjs from 'fcr-js/src'
 import { formatWeiNumberString, formatTimestamp } from './formatters'
+import ShortAddress from './Components/ShortAddress'
 
 // TODO add config to the CLI to switch envs (local, ropsten, etc)
 const fcr = fcrjs(web3, config.local)
@@ -90,7 +91,9 @@ class Home extends Component {
               </tr>
               <tr>
                 <td className={'shady'}>Applicant</td>
-                <td>{application.applicant}</td>
+                <td>
+                  <ShortAddress address={application.applicant} />
+                </td>
               </tr>
               <tr>
                 <td className={'shady'}>Deposit</td>
