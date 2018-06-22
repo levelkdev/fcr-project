@@ -213,21 +213,8 @@ class Listing extends Component {
 
   renderTradeData () {
     let i = 0
-    const tradeRows = this.state.trades.map((trade) => {
-      i++
-      return (
-        <tr key={`trade_${i}`}>
-          <td>{trade.buyer}</td>
-          <td>{trade.outcomeTokenIndex}</td>
-          <td>{formatWeiNumberString(trade.outcomeTokenCost)}</td>
-          <td>{formatWeiNumberString(trade.outcomeTokenCount)}</td>
-          <td>{formatWeiNumberString(trade.marketFees)}</td>
-        </tr>
-      )
-    })
-    return (
-      <div>
-        <h3>Trades</h3>
+    const tradeTable = this.state.trades.length > 0 ?
+      (
         <table>
           <tbody>
             <tr>
@@ -237,9 +224,27 @@ class Listing extends Component {
               <td className={'shady'}>Count</td>
               <td className={'shady'}>Fees</td>
             </tr>
-            {tradeRows}
+            {
+              this.state.trades.map((trade) => {
+                i++
+                return (
+                  <tr key={`trade_${i}`}>
+                    <td>{trade.buyer}</td>
+                    <td>{trade.outcomeTokenIndex}</td>
+                    <td>{formatWeiNumberString(trade.outcomeTokenCost)}</td>
+                    <td>{formatWeiNumberString(trade.outcomeTokenCount)}</td>
+                    <td>{formatWeiNumberString(trade.marketFees)}</td>
+                  </tr>
+                )
+              })
+            }
           </tbody>
         </table>
+      ) : <div>None</div>
+    return (
+      <div>
+        <h3>Trades</h3>
+        {tradeTable}
       </div>
     )
   }
