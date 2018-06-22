@@ -6,6 +6,7 @@ import fcrjs from 'fcr-js/src'
 import {
   formatBool,
   formatWeiNumberString,
+  formatShortenedWeiNumberString,
   formatTimestamp
 } from './formatters'
 import TimeRemainingDisplay from './Components/TimeRemainingDisplay'
@@ -231,9 +232,9 @@ class Listing extends Component {
                   <tr key={`trade_${i}`}>
                     <td>{trade.buyer}</td>
                     <td>{trade.outcomeTokenIndex}</td>
-                    <td>{formatWeiNumberString(trade.outcomeTokenCost)}</td>
+                    <td>{formatShortenedWeiNumberString(trade.outcomeTokenCost)}</td>
                     <td>{formatWeiNumberString(trade.outcomeTokenCount)}</td>
-                    <td>{formatWeiNumberString(trade.marketFees)}</td>
+                    <td>{formatShortenedWeiNumberString(trade.marketFees)}</td>
                   </tr>
                 )
               })

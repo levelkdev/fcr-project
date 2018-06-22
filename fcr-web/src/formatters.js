@@ -15,6 +15,15 @@ export function formatWeiNumberString (numStr) {
   }
 }
 
+export function formatShortenedWeiNumberString (numStr) {
+  if (numStr) {
+    const d = new Decimal(numStr).div(10 ** 18).toDecimalPlaces(4, Decimal.ROUND_UP)
+    return d.toString()
+  } else {
+    return '0'
+  }
+}
+
 export function formatTimestamp (timestampInSeconds) {
   const unixTimestamp = parseInt(timestampInSeconds) * 1000
   return moment(unixTimestamp).format("MMMM Do YYYY, h:mm:ss a")
