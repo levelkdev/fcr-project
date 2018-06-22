@@ -1,7 +1,7 @@
 body {
   margin: 10px;
   padding: 0;
-  font-family: sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   padding-bottom: 500px;
 }
 
@@ -35,6 +35,10 @@ body {
     bottom: 0;
 }
 
+.short-address {
+    font-family: 'Courier New', Courier, monospace;
+}
+
 .copy-btn {
     cursor: pointer;
     color: #2780f5;
@@ -48,7 +52,7 @@ body {
 
 .tooltip .tooltiptext {
     visibility: hidden;
-    width: 400px;
+    width: 450px;
     background-color: #555;
     color: #fff;
     text-align: center;
