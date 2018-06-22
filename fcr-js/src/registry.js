@@ -86,7 +86,7 @@ module.exports = (token, LMSR, web3, address, defaultOptions) => {
 
   const getChallenge = async (challengeNonce) => {
     const challengeAddress = await contract.methods.challenges(challengeNonce).call()
-    return challenge(token, LMSR, web3, challengeAddress, defaultOptions)
+    return challenge(token, LMSR, web3, challengeNonce, challengeAddress, defaultOptions)
   }
 
   const getAllChallenges = async () => {

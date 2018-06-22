@@ -259,9 +259,9 @@ class Listing extends Component {
   renderChallengeData () {
     let futarchyOutcome
     if (this.state.challenge.futarchyOutcome == 0) {
-      futarchyOutcome = 'Passed'
+      futarchyOutcome = 'Challenge Failed'
     } else if (this.state.challenge.futarchyOutcome == 1) {
-      futarchyOutcome = 'Failed'
+      futarchyOutcome = 'Challenge Passed'
     } else {
       futarchyOutcome = 'None'
     }
@@ -337,11 +337,11 @@ class Listing extends Component {
     const { challenge } = this.state
     const { outcomeAveragePrices } = challenge
     const decisionPeriodStatus = challenge.futarchyTradingResolutionDate > this.props.blockTime ?
-      'ACTIVE' : 'CLOSED'
+      'Active' : 'Closed'
     const challengePassing = outcomeAveragePrices.LONG_ACCEPTED > outcomeAveragePrices.LONG_DENIED
-    const outcomeStatus = decisionPeriodStatus == 'ACTIVE' ? 
-      (challengePassing ? 'PASSING' : 'FAILING') :
-      (challengePassing ? 'PASSED' : 'FAILED')
+    const outcomeStatus = decisionPeriodStatus == 'Active' ? 
+      (challengePassing ? 'Failing' : 'Passing') :
+      (challengePassing ? 'Failed' : 'Passed')
     return (
       <table>
         <tbody>

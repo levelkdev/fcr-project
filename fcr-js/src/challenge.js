@@ -8,6 +8,7 @@ const timedOracleABI = require('./abis/timedOracleABI')
 const TransactionSender = require('./transactionSender')
 const decisions = require('./enums/decisions')
 const outcomes = require('./enums/outcomes')
+const challengeStatuses = require('./enums/challengeStatuses')
 const token = require('./token')
 
 function decisionForOutcome (outcome) {
@@ -66,7 +67,7 @@ function watchEventFn (contract, eventName) {
   }
 }
 
-module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
+module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
   if (!defaultOptions) defaultOptions = {}
 
   const contract = new web3.eth.Contract(challengeABI, address)
@@ -79,6 +80,26 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
   const funded = async () => {
     const funded = await contract.methods.isFunded().call()
     return funded
+  }
+
+  const ended = async () => {
+    const isEnded = await contract.methods.ended().call()
+    return isEnded
+  }
+
+  const passed = async () => {
+    const isPassed = await contract.methods.passed().call()
+    return isPassed
+  }
+
+  const status = async () => {
+    const isEnded = await ended()
+    if (!isEnded) {
+      return challengeStatuses[0] // ACTIVE
+    } else {
+      const isPassed = await passed()
+      return challengeStatuses[isPassed ? 1 : 2] // PASSED || FAILED
+    }
   }
 
   const futarchyOutcome = async () => {
@@ -359,10 +380,14 @@ module.exports = (fcrToken, LMSR, web3, address, defaultOptions) => {
   }
 
   return {
+    ID: id,
     start,
     started,
     fund,
     funded,
+    ended,
+    passed,
+    status,
     futarchyOutcome,
     futarchyTradingPeriod,
     futarchyTradingResolutionDate,
