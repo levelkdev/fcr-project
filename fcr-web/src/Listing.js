@@ -118,6 +118,7 @@ class Listing extends Component {
 
       const challengeStarted = await this.challenge.started()
       const challengeFunded = await this.challenge.funded()
+      const challengeEnded = await this.challenge.ended()
       const challenger = await this.challenge.contract.methods.challenger().call()
       const stakeAmount = await this.challenge.contract.methods.stakeAmount().call()
       const upperBound = await this.challenge.contract.methods.upperBound().call()
@@ -151,6 +152,7 @@ class Listing extends Component {
         challenge: {
           started: challengeStarted,
           funded: challengeFunded,
+          ended: challengeEnded,
           challenger,
           stakeAmount,
           lowerBound,
@@ -335,7 +337,7 @@ class Listing extends Component {
 
   renderChallengeStatus () {
     const { challenge } = this.state
-    const { outcomeAveragePrices } = challenge
+    const { outcomeAveragePrices, ended } = challenge
     const decisionPeriodStatus = challenge.futarchyTradingResolutionDate > this.props.blockTime ?
       'Active' : 'Closed'
     const challengePassing = outcomeAveragePrices.LONG_ACCEPTED > outcomeAveragePrices.LONG_DENIED
@@ -352,6 +354,10 @@ class Listing extends Component {
           <tr>
             <td className={'shady'}>Decision Period</td>
             <td>{decisionPeriodStatus}</td>
+          </tr>
+          <tr>
+            <td className={'shady'}>Closed</td>
+            <td>{ended ? 'Yes' : 'No'}</td>
           </tr>
         </tbody>
       </table>
