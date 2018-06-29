@@ -1,0 +1,20 @@
+.challenge-status-indicator {
+  background-color: #adadad;
+  color: white;
+  padding: 5px 15px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.challenge-status-indicator .icon {
+  font-size: 15px;
+  padding-left: 5px;
+}
+
+.challenge-status-indicator.passed {
+  background-color: #34ad34; 
+}
+
+.challenge-status-indicator.failed {
+  background-color: red;
+}

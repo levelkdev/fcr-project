@@ -11,6 +11,7 @@ import {
 } from './formatters'
 import TimeRemainingDisplay from './Components/TimeRemainingDisplay'
 import ShortAddress from './Components/ShortAddress'
+import ChallengeStatusIndicator from './Components/ChallengeStatusIndicator';
 
 const BN = web3.utils.BN
 
@@ -365,12 +366,20 @@ class Listing extends Component {
   }
 
   renderChallenge () {
+    const { challenge } = this.state
+    const { futarchyOutcome, ended } = challenge
+    const challengeStatus = ended ? 
+      (futarchyOutcome == 0 ? 'failed' : 'passed') : 'active'
     if (this.state.listingLoaded) {
       let challengeElem
       if (this.state.challengeID > 0) {
         if (this.state.loadedChallengeState) {
           challengeElem = (
             <div>
+              <div>
+                <ChallengeStatusIndicator status={challengeStatus} />
+              </div>
+              <br /><br />
               <div>
                 {this.renderChallengeStatus()}
               </div>
