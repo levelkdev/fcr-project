@@ -7,6 +7,7 @@ import config from 'fcr-config'
 import fcrjs from 'fcr-js/src'
 import { formatWeiNumberString, formatTimestamp } from './formatters'
 import ShortAddress from './Components/ShortAddress'
+import ChallengeStatusIndicator from './Components/ChallengeStatusIndicator'
 
 // TODO add config to the CLI to switch envs (local, ropsten, etc)
 const fcr = fcrjs(web3, config.local)
@@ -50,6 +51,9 @@ class Home extends Component {
     }
     const listing = await fcr.registry.getListing(application.listingHash)
     application.challengeID = parseInt(listing.challengeID)
+    application = _.extend(
+      await this.fetchChallengeData(listing.challengeID), application
+    )
     let applications = this.state.applications
     applications.unshift(application)
     this.setState({ applications })
@@ -61,14 +65,44 @@ class Home extends Component {
     let application = _.find(applications, { listingHash })
     if (application) {
       application.challengeID = event.returnValues.challengeID
+      application = _.extend(
+        await this.fetchChallengeData(application.challengeID), application
+      )
       this.setState({ applications })
+    }
+  }
+
+  async fetchChallengeData (challengeID) {
+    if (challengeID > 0) {
+      const challenge = await fcr.registry.getChallenge(challengeID)
+      const ended = await challenge.ended()
+      const futarchyOutcome = await challenge.futarchyOutcome()
+      const challengeStatus = ended ? 
+        (futarchyOutcome == 0 ? 'failed' : 'passed') : 'active'
+      return {
+        challengeOutcome: futarchyOutcome,
+        challengeEnded: ended,
+        challengeStatus
+      }
+    } else {
+      return {}
     }
   }
 
   render() {
     const applicationElems = this.state.applications.map((application) => {
 
-      const challengeIdRowElem = application.challengeID > 0 ? 
+      const challengeOutcomeRowElem = application.challengeID > 0 ? 
+        (
+          <tr>
+            <td className={'shady'}>Challenge Status</td>
+            <td>
+              <ChallengeStatusIndicator status={application.challengeStatus} />
+            </td>
+          </tr>
+        ) : null
+        
+      const challengeIdRowElem = application.challengeID > 0 ?
         (
           <tr>
             <td className={'shady'}>Challenge ID</td>
@@ -99,6 +133,7 @@ class Home extends Component {
                 <td className={'shady'}>Deposit</td>
                 <td>{formatWeiNumberString(application.deposit)}</td>
               </tr>
+              {challengeOutcomeRowElem}
               {challengeIdRowElem}
             </tbody>
           </table>
