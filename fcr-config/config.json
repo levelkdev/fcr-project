@@ -4,7 +4,7 @@
     "registryAddress": "0x27ab0937d55feb5b03b2e83228c5f3c85ac76762",
     "LMSRMarketMakerAddress": "0xbf9693e1b40b3a75d21c8bd859361760f8890c72",
     "defaultOptions": {
-      "gas": 20000000
+      "gas": 7000000
     }
   }
 }
