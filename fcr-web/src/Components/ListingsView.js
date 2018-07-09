@@ -1,20 +1,19 @@
 import _ from 'lodash'
-import moment from 'moment'
-import web3 from './socketWeb3'
 import React, { Component } from 'react'
 import ipfsAPI from 'ipfs-api'
 import config from 'fcr-config'
 import fcrjs from 'fcr-js/src'
-import { formatWeiNumberString, formatTimestamp } from './formatters'
-import ShortAddress from './Components/ShortAddress'
-import ChallengeStatusIndicator from './Components/ChallengeStatusIndicator'
+import web3 from '../socketWeb3'
+import { formatWeiNumberString, formatTimestamp } from '../formatters'
+import ShortAddress from './ShortAddress'
+import ChallengeStatusIndicator from './ChallengeStatusIndicator'
 
 // TODO add config to the CLI to switch envs (local, ropsten, etc)
 const fcr = fcrjs(web3, config.local)
 
 const ipfs = ipfsAPI('ipfs.infura.io', '5001', {protocol: 'https'})
 
-class Home extends Component {
+class ListingsView extends Component {
 
   constructor(props) {
     super(props)
@@ -50,13 +49,21 @@ class Home extends Component {
       listingHash: web3.utils.toAscii(vals.listingHash)
     }
     const listing = await fcr.registry.getListing(application.listingHash)
-    application.challengeID = parseInt(listing.challengeID)
-    application = _.extend(
-      await this.fetchChallengeData(listing.challengeID), application
-    )
-    let applications = this.state.applications
-    applications.unshift(application)
-    this.setState({ applications })
+
+    console.log(`APPLICATION FOR ${application.listingHash}: `)
+    console.log(listing)
+    console.log('')
+    
+    if (listing.whitelisted == this.props.whitelisted) {
+      // add the listing
+      application.challengeID = parseInt(listing.challengeID)
+      application = _.extend(
+        await this.fetchChallengeData(listing.challengeID), application
+      )
+      let applications = this.state.applications
+      applications.unshift(application)
+      this.setState({ applications })
+    }
   }
 
   async setChallengeEventToState (event) {
@@ -90,7 +97,7 @@ class Home extends Component {
   }
 
   render() {
-    const applicationElems = this.state.applications.map((application) => {
+    const listingElems = this.state.applications.map((application) => {
 
       const challengeOutcomeRowElem = application.challengeID > 0 ? 
         (
@@ -143,11 +150,10 @@ class Home extends Component {
     })
     return (
       <div>
-        <h1>Applications</h1>
-        {applicationElems}
+        {listingElems}
       </div>
     )
   }
 }
 
-export default Home;
+export default ListingsView;

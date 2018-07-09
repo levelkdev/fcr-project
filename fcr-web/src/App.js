@@ -1,6 +1,5 @@
 
 import React, { Component } from 'react'
-import { Button } from 'react-bootstrap'
 import './fontawesome/css/all.css'
 import './App.css'
 import {
@@ -9,7 +8,8 @@ import {
   HashRouter
 } from "react-router-dom"
 import web3 from './socketWeb3'
-import Home from "./Home"
+import Applications from "./Applications"
+import Registry from "./Registry"
 import Listing from "./Listing"
 import getLatestBlock from './eth/getLatestBlock'
 import TimeDisplay from './Components/TimeDisplay'
@@ -61,7 +61,9 @@ class App extends Component {
 
           <div className="topnav">
             <div className="nav-left">
-              <NavLink to="/home">Home</NavLink>
+              <NavLink to="/applications">Applications</NavLink>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <NavLink to="/registry">Registry</NavLink>
             </div>
             <ul className="nav-right">
               <li>
@@ -74,8 +76,9 @@ class App extends Component {
           </div>
 
           <div className="content">
-            <Route exact path="/" component={Home}/>
-            <Route exact path="/home" component={Home}/>
+            <Route exact path="/" component={Applications}/>
+            <Route exact path="/applications" component={Applications}/>
+            <Route exact path="/registry" component={Registry}/>
             <Route exact path="/listings/:listingHash" render={props => (
               <Listing {...props} blockTime={this.state.latestBlockTime} />
             )}/>
