@@ -10,6 +10,7 @@ import {
 import web3 from './socketWeb3'
 import Applications from "./Applications"
 import Registry from "./Registry"
+import RejectedApplications from "./RejectedApplications"
 import Listing from "./Listing"
 import getLatestBlock from './eth/getLatestBlock'
 import TimeDisplay from './Components/TimeDisplay'
@@ -64,6 +65,8 @@ class App extends Component {
               <NavLink to="/applications">Applications</NavLink>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <NavLink to="/registry">Registry</NavLink>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <NavLink to="/rejected">Rejected</NavLink>
             </div>
             <ul className="nav-right">
               <li>
@@ -79,6 +82,7 @@ class App extends Component {
             <Route exact path="/" component={Applications}/>
             <Route exact path="/applications" component={Applications}/>
             <Route exact path="/registry" component={Registry}/>
+            <Route exact path="/rejected" component={RejectedApplications}/>
             <Route exact path="/listings/:listingHash" render={props => (
               <Listing {...props} blockTime={this.state.latestBlockTime} />
             )}/>

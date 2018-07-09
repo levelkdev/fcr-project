@@ -7,7 +7,7 @@ class Registry extends Component {
     return (
       <div>
         <h1>Approved for Registry</h1>
-        <ListingsView whitelisted={true} />
+        <ListingsView whitelisted={true} deleted={false} />
       </div>
     )
   }

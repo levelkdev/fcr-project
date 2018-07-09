@@ -7,7 +7,7 @@ class Applications extends Component {
     return (
       <div>
         <h1>Applications</h1>
-        <ListingsView whitelisted={false} />
+        <ListingsView whitelisted={false} deleted={false} />
       </div>
     )
   }

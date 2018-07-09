@@ -37,6 +37,27 @@ class ListingsView extends Component {
       (event) => { this.setChallengeEventToState(event) },
       console.error
     )
+
+    fcr.registry.watchEvent(
+      '_ApplicationWhitelisted',
+      null,
+      (event) => { this.setListingUpdateToState(event) },
+      console.error
+    )
+
+    fcr.registry.watchEvent(
+      '_ApplicationRemoved',
+      null,
+      (event) => { this.setListingUpdateToState(event) },
+      console.error
+    )
+
+    fcr.registry.watchEvent(
+      '_ListingRemoved',
+      null,
+      (event) => { this.setListingUpdateToState(event) },
+      console.error
+    )
   }
 
   async setApplicationEventToState (event) {
@@ -49,21 +70,20 @@ class ListingsView extends Component {
       listingHash: web3.utils.toAscii(vals.listingHash)
     }
     const listing = await fcr.registry.getListing(application.listingHash)
+    application.whitelisted = listing.whitelisted
+    application.deleted = parseInt(listing.deposit) == 0
 
-    console.log(`APPLICATION FOR ${application.listingHash}: `)
+    console.log(`GOT APPLICATION FOR ${application.listingHash}: `)
     console.log(listing)
     console.log('')
-    
-    if (listing.whitelisted == this.props.whitelisted) {
-      // add the listing
-      application.challengeID = parseInt(listing.challengeID)
-      application = _.extend(
-        await this.fetchChallengeData(listing.challengeID), application
-      )
-      let applications = this.state.applications
-      applications.unshift(application)
-      this.setState({ applications })
-    }
+
+    application.challengeID = parseInt(listing.challengeID)
+    application = _.extend(
+      await this.fetchChallengeData(listing.challengeID), application
+    )
+    let applications = this.state.applications
+    applications.unshift(application)
+    this.setState({ applications })
   }
 
   async setChallengeEventToState (event) {
@@ -75,6 +95,24 @@ class ListingsView extends Component {
       application = _.extend(
         await this.fetchChallengeData(application.challengeID), application
       )
+      this.setState({ applications })
+    }
+  }
+
+  async setListingUpdateToState (event) {
+    const rawListingHash = event.returnValues.listingHash
+    const listingHash = web3.utils.toAscii(rawListingHash)
+    const listing = await fcr.registry.getListing(listingHash)
+
+    console.log('EVENT: ', event)
+    console.log('LISTING HASH: ', listingHash)
+    console.log('LISTING: ', listing)
+
+    const applications = this.state.applications
+    let application = _.find(applications, { listingHash })
+    if (application) {
+      application.whitelisted = listing.whitelisted
+      application.deleted = parseInt(listing.deposit) == 0
       this.setState({ applications })
     }
   }
@@ -97,7 +135,11 @@ class ListingsView extends Component {
   }
 
   render() {
-    const listingElems = this.state.applications.map((application) => {
+    let applications = _.map(this.state.applications, _.clone);
+    _.remove(applications, (app) => {
+      return app.whitelisted != this.props.whitelisted || app.deleted != this.props.deleted
+    })
+    const listingElems = applications.map((application) => {
 
       const challengeOutcomeRowElem = application.challengeID > 0 ? 
         (
