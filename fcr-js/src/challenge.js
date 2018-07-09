@@ -241,8 +241,8 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     const transactionSender = new TransactionSender()
 
     const futarchyOracle = await getFutarchyOracle()
-    const isOutcomeSest = await futarchyOracle.methods.isOutcomeSet().call()
-    if (isOutcomeSest) {
+    const isOutcomeSet = await futarchyOracle.methods.isOutcomeSet().call()
+    if (isOutcomeSet) {
       throw new Error('challenge outcome has already been set')
     }
 
@@ -260,6 +260,12 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     )
 
     return transactionSender.response()
+  }
+
+  const isOutcomeSet = async () => {
+    const futarchyOracle = await getFutarchyOracle()
+    const outcomeSet = await futarchyOracle.methods.isOutcomeSet().call()
+    return outcomeSet
   }
 
   const getFutarchyOracle = async () => {
@@ -395,6 +401,7 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     conditionalTradingResolutionDate,
     buyOutcome,
     setOutcome,
+    isOutcomeSet,
     getFutarchyOracle,
     getCategoricalEvent,
     getDecisionMarket,

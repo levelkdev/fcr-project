@@ -183,14 +183,36 @@ yargs
         return
       }
 
+      const isOutcomeSet = await challenge.isOutcomeSet()
+      if (!isOutcomeSet) {
+        await execSenderFunction(
+          argv,
+          `registry.getChallenge(${challenge.ID}).setOutcome`,
+          challenge.setOutcome,
+          [
+            ['sender', sender]
+          ]
+        )
+
+        // TODO: output the outcome result
+        console.log(`Outcome set for challenge on listing '${argv.listingHash}'`)
+        console.log('')
+      }
+
       await execSenderFunction(
         argv,
-        `registry.getChallenge(${challenge.ID}).setOutcome`,
-        challenge.setOutcome,
+        `registry.updateStatus`,
+        fcr.registry.updateStatus,
         [
-          ['sender', sender]
+          ['sender', sender],
+          ['listingHash', argv.listingHash],
         ]
       )
+
+      console.log(`Listing '${argv.listingHash} status updated`)
+      console.log('')
+
+      const outcome = await challenge
     }
   )
 

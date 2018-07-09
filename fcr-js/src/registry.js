@@ -54,6 +54,29 @@ module.exports = (token, LMSR, web3, address, defaultOptions) => {
     return transactionSender.response()
   }
 
+  const updateStatus = async (sender, listingHash) => {
+    const existingListing = await getListing(listingHash)
+    if (existingListing.challengeID !== '0') {
+      const challenge = await getChallenge(existingListing.challengeID)
+      const challengeEnded = await challenge.ended()
+      if (!challengeEnded) {
+        throw new Error(`listing '${listingHash}' still has an active challenge`)
+      }
+    }
+
+    const transactionSender = new TransactionSender()
+    await transactionSender.send(
+      contract,
+      'updateStatus',
+      [
+        web3.utils.fromAscii(listingHash)
+      ],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    return transactionSender.response()
+  }
+
   const createChallenge = async (challenger, listingHash, data) => {
     const existingListing = await getListing(listingHash)
     if (existingListing.applicationExpiry === '0' || existingListing.isWhitelisted === false) {
@@ -115,6 +138,7 @@ module.exports = (token, LMSR, web3, address, defaultOptions) => {
   return {
     watchEvent,
     apply,
+    updateStatus,
     createChallenge,
     getAllChallenges,
     getListing,
