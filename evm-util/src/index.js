@@ -74,6 +74,7 @@ yargs
     }
   )
 
+  .scriptName('evm')
   .help()
   .showHelpOnFail(false)
   .argv
