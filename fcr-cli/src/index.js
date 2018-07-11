@@ -275,6 +275,7 @@ yargs
     }
   )
 
+  .scriptName('fcr')
   .help()
   .showHelpOnFail(false)
   .argv
