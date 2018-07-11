@@ -6,7 +6,7 @@ class Applications extends Component {
   render() {
     return (
       <div>
-        <h1>Applications</h1>
+        <h1>Pending Applications</h1>
         <ListingsView whitelisted={false} deleted={false} />
       </div>
     )
