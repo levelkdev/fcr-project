@@ -215,7 +215,7 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     const totalOutcomeCost = outcomeCost + outcomeFee
 
     const decisionToken = await getDecisionToken(decision)
-    
+
     const approveDecisionTokenTxResp = await decisionToken.approve(
       buyer,
       decisionMarket.options.address,
@@ -227,10 +227,13 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
       decisionToken.address
     )
 
+    let outcomeTokenAmounts = [0, 0]
+    outcomeTokenAmounts[outcomeIndex] = amount
+
     await transactionSender.send(
       decisionMarket,
-      'buy',
-      [ outcomeIndex, amount, totalOutcomeCost ],
+      'trade',
+      [ outcomeTokenAmounts, totalOutcomeCost ],
       _.extend({ from: buyer }, defaultOptions)
     )
 
@@ -314,10 +317,12 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
       decisionForOutcome(outcome)
     )
 
-    const outcomeCost = await LMSR.methods.calcCost(
+    let outcomeTokenAmounts = [0, 0]
+    outcomeTokenAmounts[outcomeTokenIndex] = amount
+
+    const outcomeCost = await LMSR.methods.calcNetCost(
       decisionMarket.options.address,
-      outcomeTokenIndex,
-      amount
+      outcomeTokenAmounts
     ).call()
 
     return outcomeCost

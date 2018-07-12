@@ -7,46 +7,15 @@ module.exports = [
         "type": "address"
       },
       {
-        "name": "outcomeTokenIndex",
-        "type": "uint8"
-      },
-      {
-        "name": "outcomeTokenCount",
-        "type": "uint256"
+        "name": "outcomeTokenAmounts",
+        "type": "int256[]"
       }
     ],
-    "name": "calcProfit",
+    "name": "calcNetCost",
     "outputs": [
       {
-        "name": "profit",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "name": "market",
-        "type": "address"
-      },
-      {
-        "name": "outcomeTokenIndex",
-        "type": "uint8"
-      },
-      {
-        "name": "outcomeTokenCount",
-        "type": "uint256"
-      }
-    ],
-    "name": "calcCost",
-    "outputs": [
-      {
-        "name": "cost",
-        "type": "uint256"
+        "name": "netCost",
+        "type": "int256"
       }
     ],
     "payable": false,

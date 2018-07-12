@@ -43,69 +43,6 @@ module.exports = [
   },
   {
     "constant": false,
-    "inputs": [
-      {
-        "name": "outcomeTokenIndex",
-        "type": "uint8"
-      },
-      {
-        "name": "outcomeTokenCount",
-        "type": "uint256"
-      },
-      {
-        "name": "minProfit",
-        "type": "uint256"
-      }
-    ],
-    "name": "shortSell",
-    "outputs": [
-      {
-        "name": "cost",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [],
-    "name": "close",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "outcomeTokenIndex",
-        "type": "uint8"
-      },
-      {
-        "name": "outcomeTokenCount",
-        "type": "uint256"
-      },
-      {
-        "name": "minProfit",
-        "type": "uint256"
-      }
-    ],
-    "name": "sell",
-    "outputs": [
-      {
-        "name": "profit",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
     "inputs": [],
     "name": "withdrawFees",
     "outputs": [
@@ -187,6 +124,20 @@ module.exports = [
       {
         "name": "",
         "type": "int256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "masterCopy",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
       }
     ],
     "payable": false,
@@ -311,47 +262,6 @@ module.exports = [
     "type": "function"
   },
   {
-    "constant": false,
-    "inputs": [],
-    "name": "getAvgPrice",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "name": "outcomeTokenIndex",
-        "type": "uint8"
-      },
-      {
-        "name": "outcomeTokenCount",
-        "type": "uint256"
-      },
-      {
-        "name": "maxCost",
-        "type": "uint256"
-      }
-    ],
-    "name": "buy",
-    "outputs": [
-      {
-        "name": "cost",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
     "constant": true,
     "inputs": [],
     "name": "FEE_RANGE",
@@ -364,33 +274,6 @@ module.exports = [
     "payable": false,
     "stateMutability": "view",
     "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "name": "_creator",
-        "type": "address"
-      },
-      {
-        "name": "_eventContract",
-        "type": "address"
-      },
-      {
-        "name": "_marketMaker",
-        "type": "address"
-      },
-      {
-        "name": "_fee",
-        "type": "uint24"
-      },
-      {
-        "name": "_startDate",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "constructor"
   },
   {
     "anonymous": false,
@@ -427,23 +310,18 @@ module.exports = [
     "inputs": [
       {
         "indexed": true,
-        "name": "buyer",
+        "name": "transactor",
         "type": "address"
       },
       {
         "indexed": false,
-        "name": "outcomeTokenIndex",
-        "type": "uint8"
+        "name": "outcomeTokenAmounts",
+        "type": "int256[]"
       },
       {
         "indexed": false,
-        "name": "outcomeTokenCount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "name": "outcomeTokenCost",
-        "type": "uint256"
+        "name": "outcomeTokenNetCost",
+        "type": "int256"
       },
       {
         "indexed": false,
@@ -451,66 +329,53 @@ module.exports = [
         "type": "uint256"
       }
     ],
-    "name": "OutcomeTokenPurchase",
+    "name": "OutcomeTokenTrade",
     "type": "event"
   },
   {
-    "anonymous": false,
+    "constant": false,
     "inputs": [
       {
-        "indexed": true,
-        "name": "seller",
-        "type": "address"
+        "name": "outcomeTokenAmounts",
+        "type": "int256[]"
       },
       {
-        "indexed": false,
-        "name": "outcomeTokenIndex",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "name": "outcomeTokenCount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "name": "outcomeTokenProfit",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "name": "marketFees",
-        "type": "uint256"
+        "name": "collateralLimit",
+        "type": "int256"
       }
     ],
-    "name": "OutcomeTokenSale",
-    "type": "event"
+    "name": "trade",
+    "outputs": [
+      {
+        "name": "netCost",
+        "type": "int256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    "anonymous": false,
-    "inputs": [
+    "constant": false,
+    "inputs": [],
+    "name": "close",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "getAvgPrice",
+    "outputs": [
       {
-        "indexed": true,
-        "name": "buyer",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "name": "outcomeTokenIndex",
-        "type": "uint8"
-      },
-      {
-        "indexed": false,
-        "name": "outcomeTokenCount",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "name": "cost",
+        "name": "",
         "type": "uint256"
       }
     ],
-    "name": "OutcomeTokenShortSale",
-    "type": "event"
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
   }
 ]
