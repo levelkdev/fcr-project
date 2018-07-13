@@ -158,6 +158,15 @@ class ListingsView extends Component {
             <td>{application.challengeID}</td>
           </tr>
         ) : null
+        
+      const challengeTradeRowElem = application.challengeID > 0 ?
+        (
+          <tr>
+            <td colspan="2">
+              <a href={`/#/futarchy-trading/${application.rawListingHash}`}>Trade</a>
+            </td>
+          </tr>
+        ) : null
 
       return (
         <div key={`listing_${application.listingHash}`}>
@@ -184,6 +193,7 @@ class ListingsView extends Component {
               </tr>
               {challengeOutcomeRowElem}
               {challengeIdRowElem}
+              {challengeTradeRowElem}
             </tbody>
           </table>
           <br /><br />

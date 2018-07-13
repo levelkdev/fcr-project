@@ -10,6 +10,8 @@ import {
 import web3 from './socketWeb3'
 import Applications from "./Applications"
 import Registry from "./Registry"
+import TokenMinting from "./TokenMinting"
+import FutarchyTrading from "./FutarchyTrading"
 import RejectedApplications from "./RejectedApplications"
 import Listing from "./Listing"
 import getLatestBlock from './eth/getLatestBlock'
@@ -67,6 +69,8 @@ class App extends Component {
               <NavLink to="/registry">Registry</NavLink>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <NavLink to="/rejected">Rejected</NavLink>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <NavLink to="/token-minting">Token Minting</NavLink>
             </div>
             <ul className="nav-right">
               <li>
@@ -83,8 +87,12 @@ class App extends Component {
             <Route exact path="/applications" component={Applications}/>
             <Route exact path="/registry" component={Registry}/>
             <Route exact path="/rejected" component={RejectedApplications}/>
+            <Route exact path="/token-minting" component={TokenMinting}/>
             <Route exact path="/listings/:listingHash" render={props => (
               <Listing {...props} blockTime={this.state.latestBlockTime} />
+            )}/>
+            <Route exact path="/futarchy-trading/:listingHash" render={props => (
+              <FutarchyTrading {...props} blockTime={this.state.latestBlockTime} />
             )}/>
           </div>
 
