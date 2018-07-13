@@ -83,7 +83,7 @@ class Listing extends Component {
         console.error
       )
 
-      this.challenge.watchOutcomeTokenPurchases(
+      this.challenge.watchOutcomeTokenTrades(
         {},
         (decision, event) => {
           this.addTradeToState(decision, event.returnValues)
@@ -107,6 +107,11 @@ class Listing extends Component {
 
   async addTradeToState (decision, tradeData) {
     tradeData = _.extend({ decisionMarket: decision }, tradeData)
+
+    const outcomeTokenIndex = parseInt(tradeData.outcomeTokenAmounts[0]) == 0 ? 1 : 0
+    tradeData.outcomeTokenCount = tradeData.outcomeTokenAmounts[outcomeTokenIndex]
+    tradeData.outcomeTokenIndex = outcomeTokenIndex
+
     this.setState({
       trades: _.concat(this.state.trades, [tradeData])
     })
@@ -236,12 +241,12 @@ class Listing extends Component {
                 return (
                   <tr key={`trade_${i}`}>
                     <td>
-                      <ShortAddress address={trade.buyer} />
+                      <ShortAddress address={trade.transactor} />
                     </td>
                     <td>
                       {`${fcr.outcomeTokens[trade.outcomeTokenIndex]}_${trade.decisionMarket}`}
                     </td>
-                    <td>{formatShortenedWeiNumberString(trade.outcomeTokenCost)}</td>
+                    <td>{formatShortenedWeiNumberString(trade.outcomeTokenNetCost)}</td>
                     <td>{formatWeiNumberString(trade.outcomeTokenCount)}</td>
                     <td>{formatShortenedWeiNumberString(trade.marketFees)}</td>
                   </tr>

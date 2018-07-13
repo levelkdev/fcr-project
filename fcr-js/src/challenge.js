@@ -363,18 +363,16 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
       (2 ** 64) - averageLongPrice
   }
 
-  const watchOutcomeTokenPurchases = async (filter, callback, errCallback) => {
+  const watchOutcomeTokenTrades = async (filter, callback, errCallback) => {
     const acceptedDecisionMarket = await getDecisionMarket('ACCEPTED')
     const deniedDecisionMarket = await getDecisionMarket('DENIED')
-    function callbackFn () {
-      
-    }
-    watchEventFn(acceptedDecisionMarket, 'OutcomeTokenPurchase')(
+
+    watchEventFn(acceptedDecisionMarket, 'OutcomeTokenTrade')(
       filter,
       function () { callback.apply(this, _.concat(['ACCEPTED'], arguments)) },
       function () { errCallback.apply(this, _.concat(['ACCEPTED'], arguments)) }
     )
-    watchEventFn(deniedDecisionMarket, 'OutcomeTokenPurchase')(
+    watchEventFn(deniedDecisionMarket, 'OutcomeTokenTrade')(
       filter,
       function () { callback.apply(this, _.concat(['DENIED'], arguments)) },
       function () { errCallback.apply(this, _.concat(['DENIED'], arguments)) }
@@ -419,7 +417,7 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     getAverageOutcomePrice,
     watchStarted: watchEventFn(contract, '_Started'),
     watchFunded: watchEventFn(contract, '_Funded'),
-    watchOutcomeTokenPurchases,
+    watchOutcomeTokenTrades,
     watchSetOutcome,
     address,
     contract
