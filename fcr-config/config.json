@@ -6,5 +6,13 @@
     "defaultOptions": {
       "gas": 7000000
     }
+  },
+  "rinkeby": {
+    "tokenAddress": "0x8be6be6ed982fbd6ec76ec6279e538fccafb8fdc",
+    "registryAddress": "0xeaff40dd987b53c8878d976847c82e818b27f50c",
+    "LMSRMarketMakerAddress": "0x5c3228e683ef888e4539a9f1f7950ed2f02e89fa",
+    "defaultOptions": {
+      "gas": 7000000
+    }
   }
 }
