@@ -12,7 +12,7 @@ module.exports = (web3, config) => {
     config.LMSRMarketMakerAddress
   )
   return {
-    tokenInstance,
+    token: tokenInstance,
     LMSRMarketMaker,
     registry: registry(
       tokenInstance,
