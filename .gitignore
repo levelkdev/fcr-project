@@ -83,3 +83,5 @@ yarn-error.log*
 
 /fcr-cli/build
 /evm-util/build
+
+secrets.json
