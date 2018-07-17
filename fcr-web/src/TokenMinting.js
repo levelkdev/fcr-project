@@ -53,11 +53,6 @@ class TokenMinting extends Component {
       balance,
       name
     })
-    tokenHolders.push({
-      address,
-      balance,
-      name
-    })
     this.setState({ tokenHolders })
   }
 

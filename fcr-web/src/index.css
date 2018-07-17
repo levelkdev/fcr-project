@@ -20,7 +20,7 @@ input {
 
 .topnav {
     position: relative;
-    padding: 15px 20px;
+    padding: 30px 20px;
     background: gainsboro;
     margin: -10px -10px 0px -10px;
     border-bottom: 1px solid #c1c1c1;
@@ -32,14 +32,44 @@ input {
     padding-left: 25px;
 }
 
-.topnav ul li .time-display {
+.topnav .block-info {
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.topnav .block-info .time-display {
     display: inline-block;
+}
+
+.topnav .block-info .block-number {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+.topnav .balance-info {
+    font-size: 12px;
+}
+
+.topnav .fcr-balance, .topnav .eth-balance {
+    display: inline-block;
+}
+
+.topnav .eth-balance {
+    margin-left: 20px;
+}
+
+.topnav .short-address {
+    margin-bottom: 7px;
+}
+
+.topnav .short-address .tooltip, .topnav .copy-btn {
+    font-size: 14px;
 }
 
 .nav-right {
     position: absolute;
     right: 20px;
-    top: 0;
+    top: 10px;
     bottom: 0;
 }
 

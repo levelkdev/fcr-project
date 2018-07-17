@@ -17,6 +17,8 @@ import RejectedApplications from "./RejectedApplications"
 import Listing from "./Listing"
 import getLatestBlock from './eth/getLatestBlock'
 import TimeDisplay from './Components/TimeDisplay'
+import ShortAddress from './Components/ShortAddress'
+import { formatWeiNumberString } from './formatters'
 
 class App extends Component {
 
@@ -24,6 +26,7 @@ class App extends Component {
     super(props)
     this.state = {
       account: null,
+      ethBalance: null,
       fcrTokenBalance: null,
       latestBlockTime: null
     }
@@ -44,6 +47,7 @@ class App extends Component {
       if (!error) {
         $this.setState({ account: accounts[0] })
         $this.fetchFCRTokenBalance(accounts[0])
+        $this.fetchETHBalance(accounts[0])
 
         fcr.token.watchEvent(
           'Mint',
@@ -83,6 +87,11 @@ class App extends Component {
     this.setState({ fcrTokenBalance: balance })
   }
 
+  async fetchETHBalance (account) {
+    const balance = await web3.eth.getBalance(account)
+    this.setState({ ethBalance: balance })
+  }
+
   setLatestBlockState (latestBlock) {
     this.setState({
       latestBlockTime: latestBlock.timestamp,
@@ -106,14 +115,21 @@ class App extends Component {
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <NavLink to="/token-minting">Token Minting</NavLink>
             </div>
-            <ul className="nav-right">
-              <li>
+            <div className="nav-right">
+              <div className="block-info">
                 <TimeDisplay timestamp={this.state.latestBlockTime} />
-              </li>
-              <li>
-                #{this.state.latestBlockNumber}
-              </li>
-            </ul>
+                <div className="block-number">Block #{this.state.latestBlockNumber}</div>
+              </div>
+              <ShortAddress address={this.state.account} />
+              <div className="balance-info">
+                <div className="fcr-balance">
+                  FCR: {formatWeiNumberString(this.state.fcrTokenBalance)}
+                </div>
+                <div className="eth-balance">
+                  ETH: {formatWeiNumberString(this.state.ethBalance)}
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="content">
