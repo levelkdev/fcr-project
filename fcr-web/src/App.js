@@ -8,6 +8,7 @@ import {
   HashRouter
 } from "react-router-dom"
 import web3 from './socketWeb3'
+import fcr from './fcrjs/fcrSocketWeb3'
 import Applications from "./Applications"
 import Registry from "./Registry"
 import TokenMinting from "./TokenMinting"
@@ -22,12 +23,15 @@ class App extends Component {
   constructor(props) {
     super(props)
     this.state = {
+      account: null,
+      fcrTokenBalance: null,
       latestBlockTime: null
     }
   }
 
   componentWillMount () {
     const $this = this
+
     web3.eth.subscribe('newBlockHeaders', function(error, result) {
       if (!error) {
         $this.setLatestBlockState(result)
@@ -35,6 +39,31 @@ class App extends Component {
         console.error(error)
       }
     })
+
+    web3.eth.getAccounts((error, accounts) => {
+      if (!error) {
+        $this.setState({ account: accounts[0] })
+        $this.fetchFCRTokenBalance(accounts[0])
+
+        fcr.token.watchEvent(
+          'Mint',
+          null,
+          (event) => { this.fetchFCRTokenBalance(accounts[0]) },
+          console.error
+        )
+
+        fcr.token.watchEvent(
+          'Transfer',
+          null,
+          (event) => { this.fetchFCRTokenBalance(accounts[0]) },
+          console.error
+        )
+
+      } else {
+        console.error(error)
+      }
+    })
+
     this.fetchBlockInfo()
   }
 
@@ -47,6 +76,11 @@ class App extends Component {
         loadingLatestBlockTime: false
       })
     }
+  }
+
+  async fetchFCRTokenBalance (account) {
+    const balance = await fcr.token.getBalance(account)
+    this.setState({ fcrTokenBalance: balance })
   }
 
   setLatestBlockState (latestBlock) {
@@ -87,7 +121,12 @@ class App extends Component {
             <Route exact path="/applications" component={Applications}/>
             <Route exact path="/registry" component={Registry}/>
             <Route exact path="/rejected" component={RejectedApplications}/>
-            <Route exact path="/token-minting" component={TokenMinting}/>
+            <Route exact path="/token-minting" render={props => (
+              <TokenMinting {...props}
+                account={this.state.account}
+                balance={this.state.fcrTokenBalance}
+              />
+            )}/>
             <Route exact path="/listings/:listingHash" render={props => (
               <Listing {...props} blockTime={this.state.latestBlockTime} />
             )}/>

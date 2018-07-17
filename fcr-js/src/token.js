@@ -1,11 +1,37 @@
 const _ = require('lodash')
-const eip20ABI = require('./abis/eip20ABI')
+const faucetTokenABI = require('./abis/faucetTokenABI')
 const TransactionSender = require('./transactionSender')
 
 module.exports = (web3, address, defaultOptions) => {
   if (!defaultOptions) defaultOptions = {}
 
-  const contract = new web3.eth.Contract(eip20ABI, address)
+  const contract = new web3.eth.Contract(faucetTokenABI, address)
+
+  // TODO: this is copied from registry, so DRY this up
+  const watchEvent = (eventName, filter, callback, errCallback) => {
+    // TODO: get the `fromBlock` value from fcr-config
+    let eventFilterConfig = {
+      fromBlock: 0,
+      toBlock: 'latest'
+    }
+    if (filter) {
+      eventFilterConfig.filter = filter
+    }
+
+    contract.getPastEvents(eventName, eventFilterConfig, async (err, events) => {
+      if (err) {
+        errCallback(err)
+      } else {
+        // TODO: calling getPastEvents() before watching for events makes
+        //       the `.on('data',...)` handler fire for all past events.
+        //       should figure out why, and see if there's a cleaner way to
+        //       get these.
+        contract.events[eventName](eventFilterConfig)
+          .on('data', callback)
+          .on('error', errCallback)
+      }
+    })
+  }
 
   const getBalance = async (owner) => {
     const bal = await contract.methods.balanceOf(owner).call()
@@ -28,8 +54,21 @@ module.exports = (web3, address, defaultOptions) => {
     return transactionSender.response()
   }
 
+  const gimmeTokens = async (tokenRequestor, data) => {
+    const transactionSender = new TransactionSender()
+    await transactionSender.send(
+      contract,
+      'gimmeTokens',
+      [ web3.utils.fromAscii(data) ],
+      _.extend({ from: tokenRequestor }, defaultOptions)
+    )
+    return transactionSender.response()
+  }
+
   return {
+    watchEvent,
     approve,
+    gimmeTokens,
     getBalance,
     getAllowance,
     contract,

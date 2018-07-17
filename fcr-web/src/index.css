@@ -83,6 +83,15 @@ body {
     opacity: 1;
 }
 
+.button {
+    background: #00a900;
+    padding: 10px 20px;
+    color: white;
+    display: inline-block;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 .content {
     margin: 10px;
 }
