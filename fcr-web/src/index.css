@@ -5,6 +5,14 @@ body {
   padding-bottom: 500px;
 }
 
+input {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 3px;
+    border: 1px solid #c7c7c7;
+    width: 300px;
+}
+
 .column {
     float: left;
     width: 50%;
@@ -115,4 +123,8 @@ table td.shady {
 table td {
     padding: 5px 10px;
     border: 1px solid black;
+}
+
+.form-group .input-label {
+    padding-bottom: 5px;
 }
