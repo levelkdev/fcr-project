@@ -158,3 +158,15 @@ table td {
 .form-group .input-label {
     padding-bottom: 5px;
 }
+
+.futarchy-decision-container {
+    display: inline-block;
+    border: 1px solid #e6e6e6;
+    padding: 20px 30px;
+    margin-right: 10px;
+    width: 400px;
+}
+
+.futarchy-decision-question {
+    font-size: 18px;
+}
