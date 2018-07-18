@@ -64,6 +64,12 @@ class TokenMinting extends Component {
         this.state.tokenHolderName
       )
       console.log('gimmeTokens tx: ', tx)
+      const approveTx = await fcr.token.approve(
+        this.props.account,
+        fcr.registry.address,
+        100 * 10 ** 18
+      )
+      console.log('approve tx: ', approveTx)
       this.setState({ gimmeTokensExecuting: false })
     }
   }
