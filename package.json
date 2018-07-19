@@ -1,0 +1,11 @@
+{
+  "name": "fcr-project",
+  "version": "0.1.0",
+  "engines": {
+    "node": "8.11.1"
+  },
+  "scripts": {
+    "postinstall": "npm install --prefix fcr-web",
+    "start": " --prefix fcr-web"
+  }
+}
