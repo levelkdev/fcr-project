@@ -147,7 +147,10 @@ class App extends Component {
               <Listing {...props} blockTime={this.state.latestBlockTime} />
             )}/>
             <Route exact path="/futarchy-trading/:listingHash" render={props => (
-              <FutarchyTrading {...props} blockTime={this.state.latestBlockTime} />
+              <FutarchyTrading {...props}
+                account={this.state.account}
+                blockTime={this.state.latestBlockTime}
+              />
             )}/>
           </div>
 

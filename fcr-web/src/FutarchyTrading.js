@@ -17,6 +17,14 @@ class FutarchyTrading extends Component {
     const listingName = web3.utils.toAscii(listingHash)
 
     this.state = {
+      decisions: {
+        ACCEPTED: {
+          tokenBuyAmount: ''
+        },
+        DENIED: {
+          tokenBuyAmount: ''
+        }
+      },
       listingHash,
       listingName,
       challengeID: null,
@@ -27,6 +35,11 @@ class FutarchyTrading extends Component {
       },
       trades: []
     }
+
+    this.handleACCEPTEDBuyAmountChange = this.handleACCEPTEDBuyAmountChange.bind(this)
+    this.handleDENIEDBuyAmountChange = this.handleDENIEDBuyAmountChange.bind(this)
+    this.executeACCEPTEDTokenBuy = this.executeACCEPTEDTokenBuy.bind(this)
+    this.executeDENIEDTokenBuy = this.executeDENIEDTokenBuy.bind(this)
   }
 
   componentWillMount () {
@@ -168,6 +181,32 @@ class FutarchyTrading extends Component {
     )
   }
 
+  async executeACCEPTEDTokenBuy () {
+    const challenge = await fcr.registry.getChallenge(this.state.challengeID)
+    const amount = parseInt(this.state.decisions.ACCEPTED.tokenBuyAmount)
+    const weiAmount = amount * 10 ** 18
+    console.log('FROM ', this.props.account)
+    console.log('BUY ', weiAmount)
+    const buyOutcomeTx = await challenge.buyOutcome(this.props.account, 'LONG_ACCEPTED', weiAmount)
+    console.log('buyOutcomeTx: ', buyOutcomeTx)
+  }
+
+  async executeDENIEDTokenBuy () {
+
+  }
+
+  handleACCEPTEDBuyAmountChange (event) {
+    let decisions = this.state.decisions
+    decisions.ACCEPTED.tokenBuyAmount = event.target.value
+		this.setState({ decisions })
+  }
+
+  handleDENIEDBuyAmountChange (event) {
+    let decisions = this.state.decisions
+    decisions.DENIED.tokenBuyAmount = event.target.value
+		this.setState({ decisions })
+  }
+
   renderDecision (outcomeIndex) {
     const outcome = outcomeIndex == 0 ? 'ACCEPTED' : 'DENIED'
     return (
@@ -176,6 +215,17 @@ class FutarchyTrading extends Component {
         <br /><br />
         <div>
           Market predicts: {formatShortenedWeiNumberString(this.state.predictedPrices[outcome])}
+        </div>
+        <br /><br />
+        <div>
+          <div className="form-group">
+            <div className="input-label">Amount:</div>
+            <input
+              value={this.state.decisions[outcome].tokenBuyAmount}
+              onChange={this[`handle${outcome}BuyAmountChange`]}
+            />
+          </div>
+          <div className="button" onClick={this[`execute${outcome}TokenBuy`]}>Buy</div>
         </div>
         <br /><br />
       </div>
