@@ -21,6 +21,7 @@ class FutarchyTrading extends Component {
       listingName,
       challengeID: null,
       loadingChallengeState: false,
+      outcomeTokenBalances: {},
       predictedPrices: {
         ACCEPTED: 0,
         DENIED: 0
@@ -100,12 +101,14 @@ class FutarchyTrading extends Component {
   }
 
   async setChallengeToState () {
+    const { account } = this.props
     if(!this.state.loadingChallengeState) {
       this.setState({ loadingChallengeState: true })
       const fixedPointONE = 2 ** 64
 
       const upperBound = await this.challenge.contract.methods.upperBound().call()
       const lowerBound = await this.challenge.contract.methods.lowerBound().call()
+
       const shortAcceptedMarginalPrice =
         await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.SHORT_ACCEPTED)
       const longAcceptedMarginalPrice =
@@ -114,6 +117,16 @@ class FutarchyTrading extends Component {
         await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.SHORT_DENIED)
       const longDeniedMarginalPrice =
         await this.challenge.calculateOutcomeMarginalPrice(fcr.outcomes.LONG_DENIED)
+
+      const shortAcceptedBalance =
+        await this.challenge.getOutcomeTokenBalance(account, fcr.outcomes.SHORT_ACCEPTED)
+      const longAcceptedBalance =
+        await this.challenge.getOutcomeTokenBalance(account, fcr.outcomes.LONG_ACCEPTED)
+      const shortDeniedBalance =
+        await this.challenge.getOutcomeTokenBalance(account, fcr.outcomes.SHORT_DENIED)
+      const longDeniedBalance =
+        await this.challenge.getOutcomeTokenBalance(account, fcr.outcomes.LONG_DENIED)
+
       this.setState({
         loadingChallengeState: false,
         outcomeMarginalPrices: {
@@ -121,6 +134,12 @@ class FutarchyTrading extends Component {
           SHORT_ACCEPTED: shortAcceptedMarginalPrice / (fixedPointONE / 10 ** 18),
           LONG_DENIED: longDeniedMarginalPrice / (fixedPointONE / 10 ** 18),
           SHORT_DENIED: shortDeniedMarginalPrice / (fixedPointONE / 10 ** 18),
+        },
+        outcomeTokenBalances: {
+          LONG_ACCEPTED: longAcceptedBalance,
+          SHORT_ACCEPTED: shortAcceptedBalance,
+          LONG_DENIED: longDeniedBalance,
+          SHORT_DENIED: shortDeniedBalance
         },
         upperBound,
         lowerBound,
@@ -242,6 +261,16 @@ class FutarchyTrading extends Component {
         <br /><br />
         <div>
           Market predicts: {formatShortenedWeiNumberString(this.state.predictedPrices[outcome])}
+        </div>
+        <div>
+          <div>
+            Your LONG Balance:&nbsp;
+            {formatWeiNumberString(this.state.outcomeTokenBalances[`LONG_${outcome}`])}
+          </div>
+          <div>
+            Your SHORT Balance:&nbsp;
+            {formatWeiNumberString(this.state.outcomeTokenBalances[`SHORT_${outcome}`])}
+          </div>
         </div>
         <br /><br />
         <div>

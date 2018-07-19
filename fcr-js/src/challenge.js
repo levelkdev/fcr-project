@@ -261,7 +261,7 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     const decision = decisionForOutcome(outcome)
     const decisionMarket = await getDecisionMarket(decision)
     
-    const outcomeToken = await getOutcomeToken(decision, outcome)
+    const outcomeToken = await getOutcomeToken(outcome)
     const outcomeTokenBalance = await outcomeToken.getBalance(seller)
 
     if (parseInt(outcomeTokenBalance) < parseInt(amount)) {
@@ -360,11 +360,20 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     return token(web3, decisionTokenAddress, defaultOptions)
   }
 
-  const getOutcomeToken = async (decision, outcome) => {
-    const decisionEvent = await getDecisionEvent(decision)
+  const getOutcomeToken = async (outcome) => {
+    validateOutcome(outcome)
+
     const outcomeIndex = indexForOutcome(outcome)
+    const decision = decisionForOutcome(outcome)
+    const decisionEvent = await getDecisionEvent(decision)
     const outcomeTokenAddress = await decisionEvent.methods.outcomeTokens(outcomeIndex).call()
     return token(web3, outcomeTokenAddress, defaultOptions)
+  }
+
+  const getOutcomeTokenBalance = async (tokenHolder, outcome) => {
+    const outcomeToken = await getOutcomeToken(outcome)
+    const balance = await outcomeToken.getBalance(tokenHolder)
+    return balance
   }
 
   const getTimedOracle = async () => {
@@ -477,6 +486,7 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     getDecisionEvent,
     getDecisionToken,
     getOutcomeToken,
+    getOutcomeTokenBalance,
     getTimedOracle,
     calculateOutcomeCost,
     calculateOutcomeMarginalPrice,
