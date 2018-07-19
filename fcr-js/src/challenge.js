@@ -295,6 +295,17 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
       _.extend({ from: seller }, defaultOptions)
     )
 
+    const categoricalEvent = await getCategoricalEvent()
+    const decisionToken = await getDecisionToken(decision)
+    const decisionTokenBalance = await decisionToken.getBalance(seller)    
+
+    await transactionSender.send(
+      categoricalEvent,
+      'sellAllOutcomes',
+      [ decisionTokenBalance ],
+      _.extend({ from: seller }, defaultOptions)
+    )
+
     return transactionSender.response()
   }
 

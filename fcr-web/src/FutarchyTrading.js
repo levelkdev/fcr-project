@@ -261,6 +261,7 @@ class FutarchyTrading extends Component {
         <br /><br />
         <div>
           Market predicts: {formatShortenedWeiNumberString(this.state.predictedPrices[outcome])}
+          <br /><br />
         </div>
         <div>
           <div>
