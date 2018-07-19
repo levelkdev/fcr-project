@@ -8,9 +8,9 @@
     }
   },
   "rinkeby": {
-    "tokenAddress": "0x8be6be6ed982fbd6ec76ec6279e538fccafb8fdc",
-    "registryAddress": "0xeaff40dd987b53c8878d976847c82e818b27f50c",
-    "LMSRMarketMakerAddress": "0x5c3228e683ef888e4539a9f1f7950ed2f02e89fa",
+    "tokenAddress": "0x4c9b4a10195e88ed83630cb2599ccc3daf064cfb",
+    "registryAddress": "0x45eee220d454a150fe4a666b5a144ac05994745a",
+    "LMSRMarketMakerAddress": "0xd7da9e941f6b892799105720a49da5b68974be8a",
     "defaultOptions": {
       "gas": 7000000
     }

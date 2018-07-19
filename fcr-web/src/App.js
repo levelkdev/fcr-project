@@ -7,7 +7,8 @@ import {
   NavLink,
   HashRouter
 } from "react-router-dom"
-import web3 from './socketWeb3'
+import socketWeb3 from './socketWeb3'
+import web3 from './web3'
 import fcr from './fcrjs/fcrSocketWeb3'
 import Applications from "./Applications"
 import Registry from "./Registry"
@@ -35,7 +36,7 @@ class App extends Component {
   componentWillMount () {
     const $this = this
 
-    web3.eth.subscribe('newBlockHeaders', function(error, result) {
+    socketWeb3.eth.subscribe('newBlockHeaders', function(error, result) {
       if (!error) {
         $this.setLatestBlockState(result)
       } else {
