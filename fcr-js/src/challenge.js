@@ -219,7 +219,7 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     const approveDecisionTokenTxResp = await decisionToken.approve(
       buyer,
       decisionMarket.options.address,
-      totalOutcomeCost
+      totalOutcomeCost * 2
     )
     transactionSender.add(
       approveDecisionTokenTxResp[0].receipt,
@@ -230,10 +230,12 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     let outcomeTokenAmounts = [0, 0]
     outcomeTokenAmounts[outcomeIndex] = amount
 
+    const collateralLimit = 0
+
     await transactionSender.send(
       decisionMarket,
       'trade',
-      [ outcomeTokenAmounts, totalOutcomeCost ],
+      [ outcomeTokenAmounts, collateralLimit ],
       _.extend({ from: buyer }, defaultOptions)
     )
 
