@@ -170,3 +170,21 @@ table td {
 .futarchy-decision-question {
     font-size: 18px;
 }
+
+.futarchy-decision-container .trading-form {
+    margin-bottom: 10px;
+}
+
+.futarchy-decision-container .trading-form .form-group, .futarchy-decision-container .button {
+    display: inline-block;
+}
+
+.futarchy-decision-container .trading-form input {
+    width: 200px;
+    margin-right: 10px;
+}
+
+.futarchy-decision-container .trading-form .button {
+    width: 90px;
+    text-align: center;
+}

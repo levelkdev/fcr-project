@@ -17,14 +17,6 @@ class FutarchyTrading extends Component {
     const listingName = web3.utils.toAscii(listingHash)
 
     this.state = {
-      decisions: {
-        ACCEPTED: {
-          tokenBuyAmount: ''
-        },
-        DENIED: {
-          tokenBuyAmount: ''
-        }
-      },
       listingHash,
       listingName,
       challengeID: null,
@@ -33,13 +25,29 @@ class FutarchyTrading extends Component {
         ACCEPTED: 0,
         DENIED: 0
       },
+      decisions: {
+        ACCEPTED: {
+          buy: {
+            amount: ''
+          },
+          sell: {
+            amount: ''
+          }
+        },
+        DENIED: {
+          buy: {
+            amount: ''
+          },
+          sell: {
+            amount: ''
+          }
+        }
+      },
       trades: []
     }
 
-    this.handleACCEPTEDBuyAmountChange = this.handleACCEPTEDBuyAmountChange.bind(this)
-    this.handleDENIEDBuyAmountChange = this.handleDENIEDBuyAmountChange.bind(this)
-    this.executeACCEPTEDTokenBuy = this.executeACCEPTEDTokenBuy.bind(this)
-    this.executeDENIEDTokenBuy = this.executeDENIEDTokenBuy.bind(this)
+    this.handleAmountChangeFn = this.handleAmountChangeFn.bind(this)
+    this.executeTokenTradeFn = this.executeTokenTradeFn.bind(this)
   }
 
   componentWillMount () {
@@ -181,28 +189,44 @@ class FutarchyTrading extends Component {
     )
   }
 
-  async executeACCEPTEDTokenBuy () {
-    const challenge = await fcr.registry.getChallenge(this.state.challengeID)
-    const amount = parseInt(this.state.decisions.ACCEPTED.tokenBuyAmount)
-    const weiAmount = amount * 10 ** 18
-    const buyOutcomeTx = await challenge.buyOutcome(this.props.account, 'LONG_ACCEPTED', weiAmount)
-    console.log('buyOutcomeTx: ', buyOutcomeTx)
+  executeTokenTradeFn (tradeType, outcome, tokenType) {
+    return async () => {
+      const challenge = await fcr.registry.getChallenge(this.state.challengeID)
+      const amount = parseInt(this.state.decisions[outcome][tradeType.toLowerCase()])
+      const weiAmount = amount * 10 ** 18
+      const buyOutcomeTx = await challenge.buyOutcome(
+        this.props.account,
+        `${tokenType}_${outcome}`,
+        weiAmount
+      )
+      console.log('buyOutcomeTx: ', buyOutcomeTx)
+    }
   }
 
-  async executeDENIEDTokenBuy () {
-
+  handleAmountChangeFn (tradeType, outcome) {
+    return (event) => {
+      let decisions = this.state.decisions
+      decisions[outcome][tradeType.toLowerCase()] = event.target.value
+      this.setState({ decisions })
+    }
   }
 
-  handleACCEPTEDBuyAmountChange (event) {
-    let decisions = this.state.decisions
-    decisions.ACCEPTED.tokenBuyAmount = event.target.value
-		this.setState({ decisions })
-  }
-
-  handleDENIEDBuyAmountChange (event) {
-    let decisions = this.state.decisions
-    decisions.DENIED.tokenBuyAmount = event.target.value
-		this.setState({ decisions })
+  renderTradingForm (tradeType, outcome, tokenType) {
+    return (
+      <div className="trading-form">
+        <div className="form-group">
+          <input
+            value={this.state.decisions[outcome].tokenBuyAmount}
+            onChange={this.handleAmountChangeFn(tradeType, outcome)}
+          />
+        </div>
+        <div className="button" onClick={this.executeTokenTradeFn(
+          tradeType,
+          outcome,
+          tokenType
+        )}>{tradeType} {tokenType}</div>
+      </div>
+    )
   }
 
   renderDecision (outcomeIndex) {
@@ -216,14 +240,10 @@ class FutarchyTrading extends Component {
         </div>
         <br /><br />
         <div>
-          <div className="form-group">
-            <div className="input-label">Amount:</div>
-            <input
-              value={this.state.decisions[outcome].tokenBuyAmount}
-              onChange={this[`handle${outcome}BuyAmountChange`]}
-            />
-          </div>
-          <div className="button" onClick={this[`execute${outcome}TokenBuy`]}>Buy</div>
+          {this.renderTradingForm('Buy', outcome, 'LONG')}
+          {this.renderTradingForm('Buy', outcome, 'SHORT')}
+          {this.renderTradingForm('Sell', outcome, 'LONG')}
+          {this.renderTradingForm('Sell', outcome, 'SHORT')}
         </div>
         <br /><br />
       </div>
