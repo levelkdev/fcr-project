@@ -291,6 +291,8 @@ async function getFromAddress (fromParamValue) {
 async function getAccountByIndex (indexOrAddress) {
   const accounts = await web3.eth.getAccounts()
 
+  console.log('ACCOUNTS: ', accounts)
+
   // check if given param is an address or an index
   const address = parseInt(indexOrAddress) > 10 ** 18 ? 
     indexOrAddress : accounts[indexOrAddress]
