@@ -188,3 +188,7 @@ table td {
     width: 90px;
     text-align: center;
 }
+
+.futarchy-decision-container .trading-form .button.sell {
+    background: #e40000;
+}

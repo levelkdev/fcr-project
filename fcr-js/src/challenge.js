@@ -242,6 +242,62 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     return transactionSender.response()
   }
 
+  const sellOutcome = async (seller, outcome, amount) => {
+    validateOutcome(outcome)
+    const outcomeIndex = indexForOutcome(outcome)
+
+    const transactionSender = new TransactionSender()
+
+    const isStarted = await contract.methods.isStarted().call()
+    if (!isStarted) {
+      throw new Error('challenge has not been started')
+    }
+
+    const isFunded = await contract.methods.isFunded().call()
+    if (!isFunded) {
+      throw new Error('challenge markets have not been funded')
+    }
+
+    const decision = decisionForOutcome(outcome)
+    const decisionMarket = await getDecisionMarket(decision)
+    
+    const outcomeToken = await getOutcomeToken(decision, outcome)
+    const outcomeTokenBalance = await outcomeToken.getBalance(seller)
+
+    if (parseInt(outcomeTokenBalance) < parseInt(amount)) {
+      throw new Error(`Account ${seller} does not have enough funds. Account balance is ${outcomeTokenBalance} but requested to sell ${amount}`)
+    }
+
+    const approveDecisionTokenTxResp = await outcomeToken.approve(
+      seller,
+      decisionMarket.options.address,
+      outcomeTokenBalance
+    )
+    transactionSender.add(
+      approveDecisionTokenTxResp[0].receipt,
+      'approve',
+      outcomeToken.address
+    )
+
+    let outcomeTokenAmounts = [0, 0]
+
+    // Market.trade() function executes a sell when amount is negative
+    outcomeTokenAmounts[outcomeIndex] = parseInt(amount) * -1
+
+    const collateralLimit = 0
+
+    // TODO: check if seller has enough token balance to execute sell
+
+    await transactionSender.send(
+      decisionMarket,
+      'trade',
+      [ outcomeTokenAmounts, collateralLimit ],
+      _.extend({ from: seller }, defaultOptions)
+    )
+
+    return transactionSender.response()
+  }
+
   const setOutcome = async (sender) => {
     const transactionSender = new TransactionSender()
 
@@ -302,6 +358,13 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     const decisionEvent = await getDecisionEvent(decision)
     const decisionTokenAddress = await decisionEvent.methods.collateralToken().call()
     return token(web3, decisionTokenAddress, defaultOptions)
+  }
+
+  const getOutcomeToken = async (decision, outcome) => {
+    const decisionEvent = await getDecisionEvent(decision)
+    const outcomeIndex = indexForOutcome(outcome)
+    const outcomeTokenAddress = await decisionEvent.methods.outcomeTokens(outcomeIndex).call()
+    return token(web3, outcomeTokenAddress, defaultOptions)
   }
 
   const getTimedOracle = async () => {
@@ -405,6 +468,7 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     conditionalTradingPeriod,
     conditionalTradingResolutionDate,
     buyOutcome,
+    sellOutcome,
     setOutcome,
     isOutcomeSet,
     getFutarchyOracle,
@@ -412,6 +476,7 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     getDecisionMarket,
     getDecisionEvent,
     getDecisionToken,
+    getOutcomeToken,
     getTimedOracle,
     calculateOutcomeCost,
     calculateOutcomeMarginalPrice,

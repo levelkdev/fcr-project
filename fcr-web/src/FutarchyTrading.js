@@ -194,12 +194,17 @@ class FutarchyTrading extends Component {
       const challenge = await fcr.registry.getChallenge(this.state.challengeID)
       const amount = parseInt(this.state.decisions[outcome][tradeType.toLowerCase()])
       const weiAmount = amount * 10 ** 18
-      const buyOutcomeTx = await challenge.buyOutcome(
+
+      const challengeFns = {
+        'Buy': 'buyOutcome',
+        'Sell': 'sellOutcome'
+      }
+      const outcomeTx = await challenge[challengeFns[tradeType]](
         this.props.account,
         `${tokenType}_${outcome}`,
         weiAmount
       )
-      console.log('buyOutcomeTx: ', buyOutcomeTx)
+      console.log(`${challengeFns[tradeType]} Tx: `, outcomeTx)
     }
   }
 
@@ -220,7 +225,7 @@ class FutarchyTrading extends Component {
             onChange={this.handleAmountChangeFn(tradeType, outcome)}
           />
         </div>
-        <div className="button" onClick={this.executeTokenTradeFn(
+        <div className={`button ${tradeType.toLowerCase()}`} onClick={this.executeTokenTradeFn(
           tradeType,
           outcome,
           tokenType
