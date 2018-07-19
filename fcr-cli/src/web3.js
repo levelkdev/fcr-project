@@ -10,13 +10,12 @@ const fs = require('fs');
 let secrets;
 let mnemonic = '';
 
-if (fs.existsSync('secrets.json')) {
-  secrets = JSON.parse(fs.readFileSync('secrets.json', 'utf8'));
+if (fs.existsSync('../secrets.json')) {
+  secrets = JSON.parse(fs.readFileSync('../secrets.json', 'utf8'));
   ({ mnemonic } = secrets);
 }
 
 const provider = new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io')
 const web3 = new Web3(provider)
-
 
 module.exports = web3

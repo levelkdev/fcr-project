@@ -8,8 +8,8 @@ const BN = web3.utils.BN;
 
 // TODO add config to the CLI to switch envs (local, ropsten, etc)
 //      probably with some global config file for the CLI that stores prefs
-const fcr = require('../../fcr-js/src')(web3, config.local)
-// const fcr = require('../../fcr-js/src')(web3, config.rinkeby)
+// const fcr = require('../../fcr-js/src')(web3, config.local)
+const fcr = require('../../fcr-js/src')(web3, config.rinkeby)
 
 yargs
   .options({
@@ -290,8 +290,6 @@ async function getFromAddress (fromParamValue) {
 
 async function getAccountByIndex (indexOrAddress) {
   const accounts = await web3.eth.getAccounts()
-
-  console.log('ACCOUNTS: ', accounts)
 
   // check if given param is an address or an index
   const address = parseInt(indexOrAddress) > 10 ** 18 ? 
