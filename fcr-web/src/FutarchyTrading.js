@@ -185,8 +185,6 @@ class FutarchyTrading extends Component {
     const challenge = await fcr.registry.getChallenge(this.state.challengeID)
     const amount = parseInt(this.state.decisions.ACCEPTED.tokenBuyAmount)
     const weiAmount = amount * 10 ** 18
-    console.log('FROM ', this.props.account)
-    console.log('BUY ', weiAmount)
     const buyOutcomeTx = await challenge.buyOutcome(this.props.account, 'LONG_ACCEPTED', weiAmount)
     console.log('buyOutcomeTx: ', buyOutcomeTx)
   }
