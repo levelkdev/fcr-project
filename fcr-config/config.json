@@ -12,7 +12,8 @@
     "registryAddress": "0x89c1eedc56ba22ecb675363aab2fe26aa3d134ba",
     "LMSRMarketMakerAddress": "0xf428b43a71041b30a5e2e2069a0205f07b54b6ec",
     "defaultOptions": {
-      "gas": 7000000
+      "gas": 7000000,
+      "gasPrice": 10000000000
     }
   }
 }
