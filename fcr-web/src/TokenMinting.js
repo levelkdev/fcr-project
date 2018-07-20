@@ -5,6 +5,8 @@ import fcrSocket from './fcrjs/fcrSocketWeb3'
 import { formatWeiNumberString } from './formatters'
 import ShortAddress from './Components/ShortAddress'
 
+const BN = web3.utils.BN
+
 class TokenMinting extends Component {
 
   constructor (props) {
@@ -67,7 +69,7 @@ class TokenMinting extends Component {
       const approveTx = await fcr.token.approve(
         this.props.account,
         fcr.registry.address,
-        1000 * 10 ** 18
+        new BN("1000000000000000000000")
       )
       console.log('approve tx: ', approveTx)
       this.setState({ gimmeTokensExecuting: false })

@@ -1,15 +1,11 @@
 const _ = require('lodash')
 const yargs = require('yargs')
-const web3 = require('./web3')
+const web3 = require('web3')
+const getWeb3 = require('./getWeb3')
 const config = require('../../fcr-config/config.json')
 const getChallenge = require('./getChallenge')
 
 const BN = web3.utils.BN;
-
-// TODO add config to the CLI to switch envs (local, ropsten, etc)
-//      probably with some global config file for the CLI that stores prefs
-// const fcr = require('../../fcr-js/src')(web3, config.local)
-const fcr = require('../../fcr-js/src')(web3, config.rinkeby)
 
 yargs
   .options({
@@ -18,6 +14,10 @@ yargs
       boolean: true,
       default: false,
       describe: 'log verbose output'
+    },
+    'network': {
+      default: 'rinkeby',
+      describe: 'network config to use'
     }
   })
 
@@ -41,8 +41,12 @@ yargs
       }
     },
     async (argv) => {
-      const applicant = await getFromAddress(argv.from)
+      const applicant = await getFromAddress(
+        getWeb3(argv.network),
+        argv.from
+      )
       const amount = tryParseIntParam('amount', argv.amount)
+      const fcr = getFcr(argv.network)
 
       await execSenderFunction(
         argv,
@@ -55,6 +59,7 @@ yargs
           ['data', argv.data]
         ]
       )
+      process.exit(1);
     }
   )
 
@@ -74,7 +79,11 @@ yargs
       }
     },
     async (argv) => {
-      const challenger = await getFromAddress(argv.from)
+      const challenger = await getFromAddress(
+        getWeb3(argv.network),
+        argv.from
+      )
+      const fcr = getFcr(argv.network)
 
       console.log(`Creating challenge for ${argv.listingHash}:`)
       
@@ -115,6 +124,7 @@ yargs
       )
       console.log(`Challenge ${listing.challengeID} funded`)
       console.log('')
+      process.exit(1);
     }
   )
 
@@ -138,7 +148,11 @@ yargs
       }
     },
     async (argv) => {
-      const buyer = await getFromAddress(argv.from)
+      const buyer = await getFromAddress(
+        getWeb3(argv.network),
+        argv.from
+      )
+      const fcr = getFcr(argv.network)
 
       const outcome = fcr.outcomes[argv.outcome]
       if (!outcome) {
@@ -161,6 +175,7 @@ yargs
           ['amount', toWeiUnits(argv.amount)]
         ]
       )
+      process.exit(1);
     }
   )
 
@@ -177,7 +192,11 @@ yargs
       }
     },
     async (argv) => {
-      const sender = await getFromAddress(argv.from)
+      const sender = await getFromAddress(
+        getWeb3(argv.network),
+        argv.from
+      )
+      const fcr = getFcr(argv.network)
 
       const challenge = await getChallenge(fcr, argv.listingHash)
       if (!challenge) {
@@ -214,7 +233,7 @@ yargs
       console.log(`Listing '${argv.listingHash} status updated`)
       console.log('')
 
-      const outcome = await challenge
+      process.exit(1);
     }
   )
 
@@ -227,6 +246,7 @@ yargs
       }
     },
     async (argv) => {
+      const fcr = getFcr(argv.network)
       const challenge = await getChallenge(fcr, argv.listingHash)
       if (!challenge) {
         console.log(`No challenge for listing '${argv.listingHash}'`)
@@ -234,15 +254,18 @@ yargs
       }
       const status = await challenge.status()
       console.log(status)
+      process.exit(1);
     }
   )
 
   .command({
     command: 'registryName',
     desc: 'get the name of the registry',
-    handler: async () => {
+    handler: async (argv) => {
+      const fcr = getFcr(argv.network)
       const name = await fcr.registry.name()
       console.log(name)
+      process.exit(1);
     }
   })
 
@@ -255,9 +278,11 @@ yargs
       }
     },
     async (argv) => {
-      const address = await getAccountByIndex(argv.address)
+      const fcr = getFcr(argv.network)
+      const address = await getAccountByIndex(getWeb3(argv.network), argv.address)
       const balance = await fcr.token.getBalance(address)
       console.log(`${address}: ${balance}`)
+      process.exit(1);
     }
   )
 
@@ -270,10 +295,12 @@ yargs
       }
     },
     async (argv) => {
-      const owner = await getAccountByIndex(argv.address)
+      const fcr = getFcr(argv.network)
+      const owner = await getAccountByIndex(getWeb3(argv.network), argv.address)
       const spender = fcr.registry.address
       const allowance = await fcr.token.getAllowance(owner, spender)
       console.log(`${owner}: ${allowance}`)
+      process.exit(1);
     }
   )
 
@@ -282,14 +309,22 @@ yargs
   .showHelpOnFail(false)
   .argv
 
-async function getFromAddress (fromParamValue) {
+function getFcr (network) {
+  const fcr = require('../../fcr-js/src')(
+    getWeb3(network),
+    config[network]
+  )
+  return fcr
+}
+
+async function getFromAddress (web3Instance, fromParamValue) {
   const fromAccountIndex = tryParseIntParam('from', fromParamValue)
-  const address = await getAccountByIndex(fromAccountIndex)
+  const address = await getAccountByIndex(web3Instance, fromAccountIndex)
   return address
 }
 
-async function getAccountByIndex (indexOrAddress) {
-  const accounts = await web3.eth.getAccounts()
+async function getAccountByIndex (web3Instance, indexOrAddress) {
+  const accounts = await web3Instance.eth.getAccounts()
 
   // check if given param is an address or an index
   const address = parseInt(indexOrAddress) > 10 ** 18 ? 
