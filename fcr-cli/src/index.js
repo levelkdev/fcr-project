@@ -238,6 +238,49 @@ yargs
   )
 
   .command(
+    'resolve <listingHash> <price>',
+    'resolve scalar market price oracles for a challenge',
+    {
+      listingHash: {
+        require: true
+      },
+      price: {
+        require: true,
+        number: true
+      },
+      from: {
+        default: '0',
+        number: true
+      }
+    },
+    async (argv) => {
+      const sender = await getFromAddress(
+        getWeb3(argv.network),
+        argv.from
+      )
+      const fcr = getFcr(argv.network)
+
+      const challenge = await getChallenge(fcr, argv.listingHash)
+      if (!challenge) {
+        console.log(`No challenge for listing '${argv.listingHash}'`)
+        return
+      }
+
+      await execSenderFunction(
+        argv,
+        `registry.getChallenge(${challenge.ID}).resolveDecisionMarkets`,
+        challenge.resolveDecisionMarkets,
+        [
+          ['sender', sender],
+          ['price', argv.price]
+        ]
+      )
+
+      process.exit(1);
+    }
+  )
+
+  .command(
     'challengeStatus <listingHash>',
     'outputs the status of a challenge for the given listingHash',
     {

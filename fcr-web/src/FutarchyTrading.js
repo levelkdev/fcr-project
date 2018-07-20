@@ -30,6 +30,7 @@ class FutarchyTrading extends Component {
         ACCEPTED: 0,
         DENIED: 0
       },
+      decisionOutcome: null,
       decisions: {
         ACCEPTED: {
           buy: {
@@ -131,6 +132,8 @@ class FutarchyTrading extends Component {
       const longDeniedBalance =
         await this.challenge.getOutcomeTokenBalance(account, fcr.outcomes.LONG_DENIED)
 
+      const decisionOutcome = await this.challenge.getDecisionOutcome('ACCEPTED')
+
       this.setState({
         loadingChallengeState: false,
         outcomeMarginalPrices: {
@@ -147,6 +150,7 @@ class FutarchyTrading extends Component {
         },
         upperBound,
         lowerBound,
+        decisionOutcome,
         predictedPrices: {
           ACCEPTED: calcPredictedPrice(
             longAcceptedMarginalPrice, shortAcceptedMarginalPrice, upperBound, lowerBound
@@ -266,10 +270,8 @@ class FutarchyTrading extends Component {
     )
   }
 
-  renderDecision (outcomeIndex) {
-    const outcome = outcomeIndex == 0 ? 'ACCEPTED' : 'DENIED'
-
-    const tradingInputContainer = this.state.inProgressTrades[outcome] ?
+  renderTradingInputContainer (outcome) {
+    return this.state.inProgressTrades[outcome] ?
       <div>Waiting for transactions...</div> :
       (
         <div>
@@ -277,6 +279,18 @@ class FutarchyTrading extends Component {
           {this.renderTradingForm('Buy', outcome, 'SHORT')}
           {this.renderTradingForm('Sell', outcome, 'LONG')}
           {this.renderTradingForm('Sell', outcome, 'SHORT')}
+        </div>
+      )
+  }
+
+  renderDecision (outcomeIndex) {
+    const outcome = outcomeIndex == 0 ? 'ACCEPTED' : 'DENIED'
+
+    const formInfo = this.state.decisionOutcome == null ?
+      this.renderTradingInputContainer(outcome) :
+      (
+        <div>
+          Market resolved: {formatShortenedWeiNumberString(this.state.decisionOutcome)}
         </div>
       )
 
@@ -299,7 +313,7 @@ class FutarchyTrading extends Component {
           </div>
         </div>
         <br /><br />
-        {tradingInputContainer}
+        {formInfo}
         <br /><br />
       </div>
     )

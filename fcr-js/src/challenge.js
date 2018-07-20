@@ -4,7 +4,7 @@ const futarchyOracleABI = require('./abis/futarchyOracleABI')
 const categoricalEventABI = require('./abis/categoricalEventABI')
 const scalarEventABI = require('./abis/scalarEventABI')
 const standardMarketWithPriceLoggerABI = require('./abis/standardMarketWithPriceLoggerABI')
-const timedOracleABI = require('./abis/timedOracleABI')
+const centralizedTimedOracleABI = require('./abis/centralizedTimedOracleABI')
 const TransactionSender = require('./transactionSender')
 const decisions = require('./enums/decisions')
 const outcomes = require('./enums/outcomes')
@@ -127,11 +127,11 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
   }
 
   const conditionalTradingPeriod = async () => {
-    const timedOracle = await getTimedOracle()
+    const timedOracle = await getPriceOracle()
   }
 
   const conditionalTradingResolutionDate = async () => {
-    const timedOracle = await getTimedOracle()
+    const timedOracle = await getPriceOracle()
     const resolutionDate = await timedOracle.methods.resolutionDate().call()
     return resolutionDate
   }
@@ -318,14 +318,48 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
       throw new Error('challenge outcome has already been set')
     }
 
-    const resolutionDate = await futarchyTradingResolutionDate()
-    const blockTime = await getBlockTime(web3)
-    if (blockTime < resolutionDate) {
-      throw new Error('challenge decision period is still active')
-    }
+    // TEMP: remove for workshop
+    //
+    // const resolutionDate = await futarchyTradingResolutionDate()
+    // const blockTime = await getBlockTime(web3)
+    // if (blockTime < resolutionDate) {
+    //   throw new Error('challenge decision period is still active')
+    // }
 
     await transactionSender.send(
       futarchyOracle,
+      'setOutcome',
+      [],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    return transactionSender.response()
+  }
+
+  const resolveDecisionMarkets = async (sender, price) => {
+    const priceOracle = await getPriceOracle()
+
+    const transactionSender = new TransactionSender()
+
+    await transactionSender.send(
+      priceOracle,
+      'setOutcome',
+      [ price ],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    const acceptedEvent = await getDecisionEvent('ACCEPTED')
+    const deniedEvent = await getDecisionEvent('DENIED')
+
+    await transactionSender.send(
+      acceptedEvent,
+      'setOutcome',
+      [],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    await transactionSender.send(
+      deniedEvent,
       'setOutcome',
       [],
       _.extend({ from: sender }, defaultOptions)
@@ -387,10 +421,21 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     return balance
   }
 
-  const getTimedOracle = async () => {
+  const getPriceOracle = async () => {
     const decisionEvent = await getDecisionEvent('ACCEPTED')
-    const timedOracleAddress = await decisionEvent.methods.oracle().call()
-    return new web3.eth.Contract(timedOracleABI, timedOracleAddress)
+    const oracleAddress = await decisionEvent.methods.oracle().call()
+    return new web3.eth.Contract(centralizedTimedOracleABI, oracleAddress)
+  }
+
+  const getDecisionOutcome = async (decision) => {
+    const decisionEvent = await getDecisionEvent(decision)
+    const isOutcomeSet = await decisionEvent.methods.isOutcomeSet().call()
+    if (isOutcomeSet) {
+      const outcomeValue = await decisionEvent.methods.outcome().call()
+      return outcomeValue
+    } else {
+      return null
+    }
   }
 
   const calculateOutcomeCost = async (outcome, amount) => {
@@ -491,6 +536,7 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     sellOutcome,
     setOutcome,
     isOutcomeSet,
+    resolveDecisionMarkets,
     getFutarchyOracle,
     getCategoricalEvent,
     getDecisionMarket,
@@ -498,7 +544,8 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     getDecisionToken,
     getOutcomeToken,
     getOutcomeTokenBalance,
-    getTimedOracle,
+    getPriceOracle,
+    getDecisionOutcome,
     calculateOutcomeCost,
     calculateOutcomeMarginalPrice,
     calculateOutcomeFee,
