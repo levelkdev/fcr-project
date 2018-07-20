@@ -165,6 +165,8 @@ table td {
     padding: 20px 30px;
     margin-right: 10px;
     width: 400px;
+    vertical-align: top;
+    height: 400px;
 }
 
 .futarchy-decision-question {

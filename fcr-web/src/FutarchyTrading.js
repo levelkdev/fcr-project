@@ -22,6 +22,10 @@ class FutarchyTrading extends Component {
       challengeID: null,
       loadingChallengeState: false,
       outcomeTokenBalances: {},
+      inProgressTrades: {
+        ACCEPTED: false,
+        DENIED: false
+      },
       predictedPrices: {
         ACCEPTED: 0,
         DENIED: 0
@@ -210,20 +214,29 @@ class FutarchyTrading extends Component {
 
   executeTokenTradeFn (tradeType, outcome, tokenType) {
     return async () => {
-      const challenge = await fcr.registry.getChallenge(this.state.challengeID)
-      const amount = parseInt(this.state.decisions[outcome][tradeType.toLowerCase()])
-      const weiAmount = amount * 10 ** 18
+      if (!this.state.inProgressTrades[outcome]) {
+        let { inProgressTrades } = this.state
+        inProgressTrades[outcome] = true
+        this.setState({ inProgressTrades })
+        const challenge = await fcr.registry.getChallenge(this.state.challengeID)
+        const amount = parseInt(this.state.decisions[outcome][tradeType.toLowerCase()])
+        const weiAmount = amount * 10 ** 18
 
-      const challengeFns = {
-        'Buy': 'buyOutcome',
-        'Sell': 'sellOutcome'
+        const challengeFns = {
+          'Buy': 'buyOutcome',
+          'Sell': 'sellOutcome'
+        }
+        const outcomeTx = await challenge[challengeFns[tradeType]](
+          this.props.account,
+          `${tokenType}_${outcome}`,
+          weiAmount
+        )
+        console.log(`${challengeFns[tradeType]} Tx: `, outcomeTx)
+
+        inProgressTrades = this.state.inProgressTrades
+        inProgressTrades[outcome] = false
+        this.setState({ inProgressTrades })
       }
-      const outcomeTx = await challenge[challengeFns[tradeType]](
-        this.props.account,
-        `${tokenType}_${outcome}`,
-        weiAmount
-      )
-      console.log(`${challengeFns[tradeType]} Tx: `, outcomeTx)
     }
   }
 
@@ -255,6 +268,18 @@ class FutarchyTrading extends Component {
 
   renderDecision (outcomeIndex) {
     const outcome = outcomeIndex == 0 ? 'ACCEPTED' : 'DENIED'
+
+    const tradingInputContainer = this.state.inProgressTrades[outcome] ?
+      <div>Waiting for transactions...</div> :
+      (
+        <div>
+          {this.renderTradingForm('Buy', outcome, 'LONG')}
+          {this.renderTradingForm('Buy', outcome, 'SHORT')}
+          {this.renderTradingForm('Sell', outcome, 'LONG')}
+          {this.renderTradingForm('Sell', outcome, 'SHORT')}
+        </div>
+      )
+
     return (
       <div className="futarchy-decision-container">
         <div className="futarchy-decision-question">If <b>{this.state.listingName}</b> is {outcomeIndex == 1 ? 'NOT ' : ' '}added,<br/>what will token price be?</div>
@@ -274,12 +299,7 @@ class FutarchyTrading extends Component {
           </div>
         </div>
         <br /><br />
-        <div>
-          {this.renderTradingForm('Buy', outcome, 'LONG')}
-          {this.renderTradingForm('Buy', outcome, 'SHORT')}
-          {this.renderTradingForm('Sell', outcome, 'LONG')}
-          {this.renderTradingForm('Sell', outcome, 'SHORT')}
-        </div>
+        {tradingInputContainer}
         <br /><br />
       </div>
     )
