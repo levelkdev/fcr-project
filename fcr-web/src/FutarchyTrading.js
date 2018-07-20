@@ -54,6 +54,7 @@ class FutarchyTrading extends Component {
 
     this.handleAmountChangeFn = this.handleAmountChangeFn.bind(this)
     this.executeTokenTradeFn = this.executeTokenTradeFn.bind(this)
+    this.handleRedeemWinnings = this.handleRedeemWinnings.bind(this)
   }
 
   componentWillMount () {
@@ -252,6 +253,12 @@ class FutarchyTrading extends Component {
     }
   }
 
+  async handleRedeemWinnings () {
+    const challenge = await fcr.registry.getChallenge(this.state.challengeID)
+    const tx = await challenge.redeemAllWinnings(this.props.account)
+    console.log('WINNINGS REDEEMED TX: ', tx)
+  }
+
   renderTradingForm (tradeType, outcome, tokenType) {
     return (
       <div className="trading-form">
@@ -283,16 +290,25 @@ class FutarchyTrading extends Component {
       )
   }
 
+  renderMarketResolvedContainer (outcome) {
+    return (
+      <div>
+        <div>
+          Market resolved: {formatShortenedWeiNumberString(this.state.decisionOutcome)}
+        </div>
+        <br /><br />
+        <div className="button" onClick={this.handleRedeemWinnings}>
+          Redeem Winnings
+        </div>
+      </div>
+    )
+  }
+
   renderDecision (outcomeIndex) {
     const outcome = outcomeIndex == 0 ? 'ACCEPTED' : 'DENIED'
 
     const formInfo = this.state.decisionOutcome == null ?
-      this.renderTradingInputContainer(outcome) :
-      (
-        <div>
-          Market resolved: {formatShortenedWeiNumberString(this.state.decisionOutcome)}
-        </div>
-      )
+      this.renderTradingInputContainer(outcome) : this.renderMarketResolvedContainer(outcome)
 
     return (
       <div className="futarchy-decision-container">

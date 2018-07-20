@@ -350,6 +350,7 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
 
     const acceptedEvent = await getDecisionEvent('ACCEPTED')
     const deniedEvent = await getDecisionEvent('DENIED')
+    const categoricalEvent = await getCategoricalEvent()
 
     await transactionSender.send(
       acceptedEvent,
@@ -362,6 +363,44 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
       deniedEvent,
       'setOutcome',
       [],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    await transactionSender.send(
+      categoricalEvent,
+      'setOutcome',
+      [],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    return transactionSender.response()
+  }
+
+  const redeemAllWinnings = async (sender) => {
+    const acceptedEvent = await getDecisionEvent('ACCEPTED')
+    const deniedEvent = await getDecisionEvent('DENIED')
+    const categoricalEvent = await getCategoricalEvent()
+
+    const transactionSender = new TransactionSender()
+
+    await transactionSender.send(
+      acceptedEvent,
+      'redeemWinnings',
+      [ ],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    await transactionSender.send(
+      deniedEvent,
+      'redeemWinnings',
+      [ ],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    await transactionSender.send(
+      categoricalEvent,
+      'redeemWinnings',
+      [ ],
       _.extend({ from: sender }, defaultOptions)
     )
 
@@ -537,6 +576,7 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     setOutcome,
     isOutcomeSet,
     resolveDecisionMarkets,
+    redeemAllWinnings,
     getFutarchyOracle,
     getCategoricalEvent,
     getDecisionMarket,
