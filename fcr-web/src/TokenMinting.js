@@ -30,7 +30,6 @@ class TokenMinting extends Component {
         const { to, amount, data } = event.returnValues
         this.addTokenHolderToState(
           to,
-          amount,
           web3.utils.toAscii(data)
         )
       },
@@ -48,7 +47,8 @@ class TokenMinting extends Component {
     )
   }
 
-  addTokenHolderToState(address, balance, name) {
+  async addTokenHolderToState(address, name) {
+    const balance = await fcr.token.getBalance(address)
     const tokenHolders = this.state.tokenHolders
     tokenHolders.push({
       address,
