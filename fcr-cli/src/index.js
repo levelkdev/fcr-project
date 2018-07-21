@@ -204,21 +204,21 @@ yargs
         return
       }
 
-      // const isOutcomeSet = await challenge.isOutcomeSet()
-      // if (!isOutcomeSet) {
-      //   await execSenderFunction(
-      //     argv,
-      //     `registry.getChallenge(${challenge.ID}).setOutcome`,
-      //     challenge.setOutcome,
-      //     [
-      //       ['sender', sender]
-      //     ]
-      //   )
+      const isOutcomeSet = await challenge.isOutcomeSet()
+      if (!isOutcomeSet) {
+        await execSenderFunction(
+          argv,
+          `registry.getChallenge(${challenge.ID}).setOutcome`,
+          challenge.setOutcome,
+          [
+            ['sender', sender]
+          ]
+        )
 
-      //   // TODO: output the outcome result
-      //   console.log(`Outcome set for challenge on listing '${argv.listingHash}'`)
-      //   console.log('')
-      // }
+        // TODO: output the outcome result
+        console.log(`Outcome set for challenge on listing '${argv.listingHash}'`)
+        console.log('')
+      }
 
       await execSenderFunction(
         argv,
