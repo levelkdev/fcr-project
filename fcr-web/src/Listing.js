@@ -1,8 +1,7 @@
 import _ from 'lodash'
 import web3 from './socketWeb3'
 import React, { Component } from 'react'
-import config from 'fcr-config'
-import fcrjs from 'fcr-js/src'
+import fcr from './fcrjs/fcrSocketWeb3'
 import {
   formatBool,
   formatWeiNumberString,
@@ -14,9 +13,6 @@ import ShortAddress from './Components/ShortAddress'
 import ChallengeStatusIndicator from './Components/ChallengeStatusIndicator';
 
 const BN = web3.utils.BN
-
-// TODO add config to the CLI to switch envs (local, ropsten, etc)
-const fcr = fcrjs(web3, config.local)
 
 class Listing extends Component {
   constructor(props) {
@@ -45,7 +41,9 @@ class Listing extends Component {
     fcr.registry.watchEvent(
       '_Challenge',
       { listingHash: this.state.listingHash },
-      (event) => { this.handleChallengeEvent(event) },
+      (event) => {
+        this.handleChallengeEvent(event)
+      },
       console.error
     )
 

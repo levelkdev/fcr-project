@@ -5,6 +5,14 @@ body {
   padding-bottom: 500px;
 }
 
+input {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 3px;
+    border: 1px solid #c7c7c7;
+    width: 300px;
+}
+
 .column {
     float: left;
     width: 50%;
@@ -12,7 +20,7 @@ body {
 
 .topnav {
     position: relative;
-    padding: 15px 20px;
+    padding: 30px 20px;
     background: gainsboro;
     margin: -10px -10px 0px -10px;
     border-bottom: 1px solid #c1c1c1;
@@ -24,14 +32,44 @@ body {
     padding-left: 25px;
 }
 
-.topnav ul li .time-display {
+.topnav .block-info {
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.topnav .block-info .time-display {
     display: inline-block;
+}
+
+.topnav .block-info .block-number {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+.topnav .balance-info {
+    font-size: 12px;
+}
+
+.topnav .fcr-balance, .topnav .eth-balance {
+    display: inline-block;
+}
+
+.topnav .eth-balance {
+    margin-left: 20px;
+}
+
+.topnav .short-address {
+    margin-bottom: 7px;
+}
+
+.topnav .short-address .tooltip, .topnav .copy-btn {
+    font-size: 14px;
 }
 
 .nav-right {
     position: absolute;
     right: 20px;
-    top: 0;
+    top: 10px;
     bottom: 0;
 }
 
@@ -83,6 +121,15 @@ body {
     opacity: 1;
 }
 
+.button {
+    background: #00a900;
+    padding: 10px 20px;
+    color: white;
+    display: inline-block;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 .content {
     margin: 10px;
 }
@@ -106,4 +153,44 @@ table td.shady {
 table td {
     padding: 5px 10px;
     border: 1px solid black;
+}
+
+.form-group .input-label {
+    padding-bottom: 5px;
+}
+
+.futarchy-decision-container {
+    display: inline-block;
+    border: 1px solid #e6e6e6;
+    padding: 20px 30px;
+    margin-right: 10px;
+    width: 400px;
+    vertical-align: top;
+    height: 400px;
+}
+
+.futarchy-decision-question {
+    font-size: 18px;
+}
+
+.futarchy-decision-container .trading-form {
+    margin-bottom: 10px;
+}
+
+.futarchy-decision-container .trading-form .form-group, .futarchy-decision-container .button {
+    display: inline-block;
+}
+
+.futarchy-decision-container .trading-form input {
+    width: 200px;
+    margin-right: 10px;
+}
+
+.futarchy-decision-container .trading-form .button {
+    width: 90px;
+    text-align: center;
+}
+
+.futarchy-decision-container .trading-form .button.sell {
+    background: #e40000;
 }

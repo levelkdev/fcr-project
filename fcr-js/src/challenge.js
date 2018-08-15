@@ -4,7 +4,7 @@ const futarchyOracleABI = require('./abis/futarchyOracleABI')
 const categoricalEventABI = require('./abis/categoricalEventABI')
 const scalarEventABI = require('./abis/scalarEventABI')
 const standardMarketWithPriceLoggerABI = require('./abis/standardMarketWithPriceLoggerABI')
-const timedOracleABI = require('./abis/timedOracleABI')
+const centralizedTimedOracleABI = require('./abis/centralizedTimedOracleABI')
 const TransactionSender = require('./transactionSender')
 const decisions = require('./enums/decisions')
 const outcomes = require('./enums/outcomes')
@@ -127,11 +127,11 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
   }
 
   const conditionalTradingPeriod = async () => {
-    const timedOracle = await getTimedOracle()
+    const timedOracle = await getPriceOracle()
   }
 
   const conditionalTradingResolutionDate = async () => {
-    const timedOracle = await getTimedOracle()
+    const timedOracle = await getPriceOracle()
     const resolutionDate = await timedOracle.methods.resolutionDate().call()
     return resolutionDate
   }
@@ -219,7 +219,7 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     const approveDecisionTokenTxResp = await decisionToken.approve(
       buyer,
       decisionMarket.options.address,
-      totalOutcomeCost
+      totalOutcomeCost * 2
     )
     transactionSender.add(
       approveDecisionTokenTxResp[0].receipt,
@@ -230,11 +230,80 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     let outcomeTokenAmounts = [0, 0]
     outcomeTokenAmounts[outcomeIndex] = amount
 
+    const collateralLimit = 0
+
     await transactionSender.send(
       decisionMarket,
       'trade',
-      [ outcomeTokenAmounts, totalOutcomeCost ],
+      [ outcomeTokenAmounts, collateralLimit ],
       _.extend({ from: buyer }, defaultOptions)
+    )
+
+    return transactionSender.response()
+  }
+
+  const sellOutcome = async (seller, outcome, amount) => {
+    validateOutcome(outcome)
+    const outcomeIndex = indexForOutcome(outcome)
+
+    const transactionSender = new TransactionSender()
+
+    const isStarted = await contract.methods.isStarted().call()
+    if (!isStarted) {
+      throw new Error('challenge has not been started')
+    }
+
+    const isFunded = await contract.methods.isFunded().call()
+    if (!isFunded) {
+      throw new Error('challenge markets have not been funded')
+    }
+
+    const decision = decisionForOutcome(outcome)
+    const decisionMarket = await getDecisionMarket(decision)
+    
+    const outcomeToken = await getOutcomeToken(outcome)
+    const outcomeTokenBalance = await outcomeToken.getBalance(seller)
+
+    if (parseInt(outcomeTokenBalance) < parseInt(amount)) {
+      throw new Error(`Account ${seller} does not have enough funds. Account balance is ${outcomeTokenBalance} but requested to sell ${amount}`)
+    }
+
+    const approveDecisionTokenTxResp = await outcomeToken.approve(
+      seller,
+      decisionMarket.options.address,
+      outcomeTokenBalance
+    )
+    transactionSender.add(
+      approveDecisionTokenTxResp[0].receipt,
+      'approve',
+      outcomeToken.address
+    )
+
+    let outcomeTokenAmounts = [0, 0]
+
+    // Market.trade() function executes a sell when amount is negative
+    outcomeTokenAmounts[outcomeIndex] = parseInt(amount) * -1
+
+    const collateralLimit = 0
+
+    // TODO: check if seller has enough token balance to execute sell
+
+    await transactionSender.send(
+      decisionMarket,
+      'trade',
+      [ outcomeTokenAmounts, collateralLimit ],
+      _.extend({ from: seller }, defaultOptions)
+    )
+
+    const categoricalEvent = await getCategoricalEvent()
+    const decisionToken = await getDecisionToken(decision)
+    const decisionTokenBalance = await decisionToken.getBalance(seller)    
+
+    await transactionSender.send(
+      categoricalEvent,
+      'sellAllOutcomes',
+      [ decisionTokenBalance ],
+      _.extend({ from: seller }, defaultOptions)
     )
 
     return transactionSender.response()
@@ -249,16 +318,89 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
       throw new Error('challenge outcome has already been set')
     }
 
-    const resolutionDate = await futarchyTradingResolutionDate()
-    const blockTime = await getBlockTime(web3)
-    if (blockTime < resolutionDate) {
-      throw new Error('challenge decision period is still active')
-    }
+    // TEMP: remove for workshop
+    //
+    // const resolutionDate = await futarchyTradingResolutionDate()
+    // const blockTime = await getBlockTime(web3)
+    // if (blockTime < resolutionDate) {
+    //   throw new Error('challenge decision period is still active')
+    // }
 
     await transactionSender.send(
       futarchyOracle,
       'setOutcome',
       [],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    return transactionSender.response()
+  }
+
+  const resolveDecisionMarkets = async (sender, price) => {
+    const priceOracle = await getPriceOracle()
+
+    const transactionSender = new TransactionSender()
+
+    await transactionSender.send(
+      priceOracle,
+      'setOutcome',
+      [ price ],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    const acceptedEvent = await getDecisionEvent('ACCEPTED')
+    const deniedEvent = await getDecisionEvent('DENIED')
+    const categoricalEvent = await getCategoricalEvent()
+
+    await transactionSender.send(
+      acceptedEvent,
+      'setOutcome',
+      [],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    await transactionSender.send(
+      deniedEvent,
+      'setOutcome',
+      [],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    await transactionSender.send(
+      categoricalEvent,
+      'setOutcome',
+      [],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    return transactionSender.response()
+  }
+
+  const redeemAllWinnings = async (sender) => {
+    const acceptedEvent = await getDecisionEvent('ACCEPTED')
+    const deniedEvent = await getDecisionEvent('DENIED')
+    const categoricalEvent = await getCategoricalEvent()
+
+    const transactionSender = new TransactionSender()
+
+    await transactionSender.send(
+      acceptedEvent,
+      'redeemWinnings',
+      [ ],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    await transactionSender.send(
+      deniedEvent,
+      'redeemWinnings',
+      [ ],
+      _.extend({ from: sender }, defaultOptions)
+    )
+
+    await transactionSender.send(
+      categoricalEvent,
+      'redeemWinnings',
+      [ ],
       _.extend({ from: sender }, defaultOptions)
     )
 
@@ -302,10 +444,37 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     return token(web3, decisionTokenAddress, defaultOptions)
   }
 
-  const getTimedOracle = async () => {
+  const getOutcomeToken = async (outcome) => {
+    validateOutcome(outcome)
+
+    const outcomeIndex = indexForOutcome(outcome)
+    const decision = decisionForOutcome(outcome)
+    const decisionEvent = await getDecisionEvent(decision)
+    const outcomeTokenAddress = await decisionEvent.methods.outcomeTokens(outcomeIndex).call()
+    return token(web3, outcomeTokenAddress, defaultOptions)
+  }
+
+  const getOutcomeTokenBalance = async (tokenHolder, outcome) => {
+    const outcomeToken = await getOutcomeToken(outcome)
+    const balance = await outcomeToken.getBalance(tokenHolder)
+    return balance
+  }
+
+  const getPriceOracle = async () => {
     const decisionEvent = await getDecisionEvent('ACCEPTED')
-    const timedOracleAddress = await decisionEvent.methods.oracle().call()
-    return new web3.eth.Contract(timedOracleABI, timedOracleAddress)
+    const oracleAddress = await decisionEvent.methods.oracle().call()
+    return new web3.eth.Contract(centralizedTimedOracleABI, oracleAddress)
+  }
+
+  const getDecisionOutcome = async (decision) => {
+    const decisionEvent = await getDecisionEvent(decision)
+    const isOutcomeSet = await decisionEvent.methods.isOutcomeSet().call()
+    if (isOutcomeSet) {
+      const outcomeValue = await decisionEvent.methods.outcome().call()
+      return outcomeValue
+    } else {
+      return null
+    }
   }
 
   const calculateOutcomeCost = async (outcome, amount) => {
@@ -403,14 +572,20 @@ module.exports = (fcrToken, LMSR, web3, id, address, defaultOptions) => {
     conditionalTradingPeriod,
     conditionalTradingResolutionDate,
     buyOutcome,
+    sellOutcome,
     setOutcome,
     isOutcomeSet,
+    resolveDecisionMarkets,
+    redeemAllWinnings,
     getFutarchyOracle,
     getCategoricalEvent,
     getDecisionMarket,
     getDecisionEvent,
     getDecisionToken,
-    getTimedOracle,
+    getOutcomeToken,
+    getOutcomeTokenBalance,
+    getPriceOracle,
+    getDecisionOutcome,
     calculateOutcomeCost,
     calculateOutcomeMarginalPrice,
     calculateOutcomeFee,

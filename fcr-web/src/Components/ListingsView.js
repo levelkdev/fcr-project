@@ -1,17 +1,11 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
-import ipfsAPI from 'ipfs-api'
-import config from 'fcr-config'
-import fcrjs from 'fcr-js/src'
-import web3 from '../socketWeb3'
+import fcrSocket from '../fcrjs/fcrSocketWeb3'
+import fcr from '../fcrjs/fcrWeb3'
+import web3 from '../web3'
 import { formatWeiNumberString, formatTimestamp } from '../formatters'
 import ShortAddress from './ShortAddress'
 import ChallengeStatusIndicator from './ChallengeStatusIndicator'
-
-// TODO add config to the CLI to switch envs (local, ropsten, etc)
-const fcr = fcrjs(web3, config.local)
-
-const ipfs = ipfsAPI('ipfs.infura.io', '5001', {protocol: 'https'})
 
 class ListingsView extends Component {
 
@@ -24,35 +18,35 @@ class ListingsView extends Component {
   }
 
   componentWillMount() {
-    fcr.registry.watchEvent(
+    fcrSocket.registry.watchEvent(
       '_Application',
       null,
       (event) => { this.setApplicationEventToState(event) },
       console.error
     )
 
-    fcr.registry.watchEvent(
+    fcrSocket.registry.watchEvent(
       '_Challenge',
       null,
       (event) => { this.setChallengeEventToState(event) },
       console.error
     )
 
-    fcr.registry.watchEvent(
+    fcrSocket.registry.watchEvent(
       '_ApplicationWhitelisted',
       null,
       (event) => { this.setListingUpdateToState(event) },
       console.error
     )
 
-    fcr.registry.watchEvent(
+    fcrSocket.registry.watchEvent(
       '_ApplicationRemoved',
       null,
       (event) => { this.setListingUpdateToState(event) },
       console.error
     )
 
-    fcr.registry.watchEvent(
+    fcrSocket.registry.watchEvent(
       '_ListingRemoved',
       null,
       (event) => { this.setListingUpdateToState(event) },
@@ -158,6 +152,15 @@ class ListingsView extends Component {
             <td>{application.challengeID}</td>
           </tr>
         ) : null
+        
+      const challengeTradeRowElem = application.challengeID > 0 ?
+        (
+          <tr>
+            <td colSpan="2">
+              <a href={`/#/futarchy-trading/${application.rawListingHash}`}>Trade</a>
+            </td>
+          </tr>
+        ) : null
 
       return (
         <div key={`listing_${application.listingHash}`}>
@@ -184,6 +187,7 @@ class ListingsView extends Component {
               </tr>
               {challengeOutcomeRowElem}
               {challengeIdRowElem}
+              {challengeTradeRowElem}
             </tbody>
           </table>
           <br /><br />

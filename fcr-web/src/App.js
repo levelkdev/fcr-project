@@ -7,32 +7,68 @@ import {
   NavLink,
   HashRouter
 } from "react-router-dom"
-import web3 from './socketWeb3'
+import socketWeb3 from './socketWeb3'
+import web3 from './web3'
+import fcr from './fcrjs/fcrSocketWeb3'
 import Applications from "./Applications"
 import Registry from "./Registry"
+import TokenMinting from "./TokenMinting"
+import FutarchyTrading from "./FutarchyTrading"
 import RejectedApplications from "./RejectedApplications"
 import Listing from "./Listing"
 import getLatestBlock from './eth/getLatestBlock'
 import TimeDisplay from './Components/TimeDisplay'
+import ShortAddress from './Components/ShortAddress'
+import { formatWeiNumberString } from './formatters'
 
 class App extends Component {
 
   constructor(props) {
     super(props)
     this.state = {
+      account: null,
+      ethBalance: null,
+      fcrTokenBalance: null,
       latestBlockTime: null
     }
   }
 
   componentWillMount () {
     const $this = this
-    web3.eth.subscribe('newBlockHeaders', function(error, result) {
+
+    socketWeb3.eth.subscribe('newBlockHeaders', function(error, result) {
       if (!error) {
         $this.setLatestBlockState(result)
       } else {
         console.error(error)
       }
     })
+
+    web3.eth.getAccounts((error, accounts) => {
+      if (!error) {
+        $this.setState({ account: accounts[0] })
+        $this.fetchFCRTokenBalance(accounts[0])
+        $this.fetchETHBalance(accounts[0])
+
+        fcr.token.watchEvent(
+          'Mint',
+          null,
+          (event) => { this.fetchFCRTokenBalance(accounts[0]) },
+          console.error
+        )
+
+        fcr.token.watchEvent(
+          'Transfer',
+          null,
+          (event) => { this.fetchFCRTokenBalance(accounts[0]) },
+          console.error
+        )
+
+      } else {
+        console.error(error)
+      }
+    })
+
     this.fetchBlockInfo()
   }
 
@@ -45,6 +81,16 @@ class App extends Component {
         loadingLatestBlockTime: false
       })
     }
+  }
+
+  async fetchFCRTokenBalance (account) {
+    const balance = await fcr.token.getBalance(account)
+    this.setState({ fcrTokenBalance: balance })
+  }
+
+  async fetchETHBalance (account) {
+    const balance = await web3.eth.getBalance(account)
+    this.setState({ ethBalance: balance })
   }
 
   setLatestBlockState (latestBlock) {
@@ -67,15 +113,24 @@ class App extends Component {
               <NavLink to="/registry">Registry</NavLink>
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <NavLink to="/rejected">Rejected</NavLink>
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              <NavLink to="/token-minting">Token Minting</NavLink>
             </div>
-            <ul className="nav-right">
-              <li>
+            <div className="nav-right">
+              <div className="block-info">
                 <TimeDisplay timestamp={this.state.latestBlockTime} />
-              </li>
-              <li>
-                #{this.state.latestBlockNumber}
-              </li>
-            </ul>
+                <div className="block-number">Block #{this.state.latestBlockNumber}</div>
+              </div>
+              <ShortAddress address={this.state.account} />
+              <div className="balance-info">
+                <div className="fcr-balance">
+                  FCR: {formatWeiNumberString(this.state.fcrTokenBalance)}
+                </div>
+                <div className="eth-balance">
+                  ETH: {formatWeiNumberString(this.state.ethBalance)}
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="content">
@@ -83,8 +138,20 @@ class App extends Component {
             <Route exact path="/applications" component={Applications}/>
             <Route exact path="/registry" component={Registry}/>
             <Route exact path="/rejected" component={RejectedApplications}/>
+            <Route exact path="/token-minting" render={props => (
+              <TokenMinting {...props}
+                account={this.state.account}
+                balance={this.state.fcrTokenBalance}
+              />
+            )}/>
             <Route exact path="/listings/:listingHash" render={props => (
               <Listing {...props} blockTime={this.state.latestBlockTime} />
+            )}/>
+            <Route exact path="/futarchy-trading/:listingHash" render={props => (
+              <FutarchyTrading {...props}
+                account={this.state.account}
+                blockTime={this.state.latestBlockTime}
+              />
             )}/>
           </div>
 

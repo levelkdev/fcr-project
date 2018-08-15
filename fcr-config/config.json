@@ -1,10 +1,19 @@
 {
   "local": {
-    "tokenAddress": "0x86d4d640e699f5da4b557a5afde4f1c431b1cf30",
-    "registryAddress": "0x27ab0937d55feb5b03b2e83228c5f3c85ac76762",
-    "LMSRMarketMakerAddress": "0xbf9693e1b40b3a75d21c8bd859361760f8890c72",
+    "tokenAddress": "0x49aec4f9c683a7e3fad25055bb3774a2c46e98bd",
+    "registryAddress": "0x862d398f7ea1ec388659d2514ab07fafe51ed762",
+    "LMSRMarketMakerAddress": "0xcac93e9c9c89c7d1ad58f3be71661612e6094139",
     "defaultOptions": {
-      "gas": 7000000
+      "gas": 6930000
+    }
+  },
+  "rinkeby": {
+    "tokenAddress": "0x1342cda88deedb4960b1aed0dba32c40a65af031",
+    "registryAddress": "0xf32357eb3a62d7d0decff0bf2fadcbe0b026832a",
+    "LMSRMarketMakerAddress": "0x20fb87c57eff3326e856c6955aae72cf88b95a7c",
+    "defaultOptions": {
+      "gas": 7000000,
+      "gasPrice": 10000000000
     }
   }
 }
