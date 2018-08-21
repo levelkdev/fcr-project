@@ -1,8 +1,8 @@
 {
   "local": {
-    "tokenAddress": "0x86d4d640e699f5da4b557a5afde4f1c431b1cf30",
-    "registryAddress": "0xb46a1a05f1bf0425c18282fb00aee1f386d531e6",
-    "LMSRMarketMakerAddress": "0xb28d807538f4465c5068385d8794859f9aff906c",
+    "tokenAddress": "0x49aec4f9c683a7e3fad25055bb3774a2c46e98bd",
+    "registryAddress": "0x862d398f7ea1ec388659d2514ab07fafe51ed762",
+    "LMSRMarketMakerAddress": "0xcac93e9c9c89c7d1ad58f3be71661612e6094139",
     "web3Url": "http://localhost:8545",
     "socketWeb3Url": "ws://localhost:8545",
     "defaultOptions": {
