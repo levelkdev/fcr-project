@@ -1,5 +1,5 @@
 import web3 from '../socketWeb3'
-import fcrjs from 'fcr-js/src'
-import config from 'fcr-config'
+import config from '../config'
+import fcrjs from 'fcr-js'
 
 export default fcrjs(web3, config.local)

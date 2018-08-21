@@ -353,7 +353,7 @@ yargs
   .argv
 
 function getFcr (network) {
-  const fcr = require('../../fcr-js/src')(
+  const fcr = require('fcr-js')(
     getWeb3(network),
     config[network]
   )

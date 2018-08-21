@@ -8,7 +8,7 @@
     "decimal.js": "^10.0.1",
     "dotenv": "^6.0.0",
     "fcr-config": "file:../fcr-config",
-    "fcr-js": "file:../fcr-js",
+    "fcr-js": "git://git@github.com:levelkdev/fcr-js#eb3275f501dbca0c6b913b21febdb778203389c1",
     "ipfs-api": "^22.0.0",
     "lodash": "^4.17.10",
     "moment": "^2.22.1",
